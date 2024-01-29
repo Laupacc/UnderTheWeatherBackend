@@ -4,7 +4,7 @@ var router = express.Router();
 const fetch = require('node-fetch');
 const City = require('../models/cities');
 
-const OWM_API_KEY = 'ce7418650c86eae6629dfcfdda141c14';
+const OWM_API_KEY = process.env.OWM_API_KEY;
 
 router.post('/', (req, res) => {
 	// Check if the city has not already been added
@@ -42,30 +42,30 @@ router.get('/', (req, res) => {
 });
 
 router.get("/:cityName", (req, res) => {
-  City.findOne({
-    cityName: { $regex: new RegExp(req.params.cityName, "i") },
-  }).then(data => {
-    if (data) {
-      res.json({ result: true, weather: data });
-    } else {
-      res.json({ result: false, error: "City not found" });
-    }
-  });
+	City.findOne({
+		cityName: { $regex: new RegExp(req.params.cityName, "i") },
+	}).then(data => {
+		if (data) {
+			res.json({ result: true, weather: data });
+		} else {
+			res.json({ result: false, error: "City not found" });
+		}
+	});
 });
 
 router.delete("/:cityName", (req, res) => {
-  City.deleteOne({
-    cityName: { $regex: new RegExp(req.params.cityName, "i") },
-  }).then(deletedDoc => {
-    if (deletedDoc.deletedCount > 0) {
-      // document successfully deleted
-      City.find().then(data => {
-        res.json({ result: true, weather: data });
-      });
-    } else {
-      res.json({ result: false, error: "City not found" });
-    }
-  });
+	City.deleteOne({
+		cityName: { $regex: new RegExp(req.params.cityName, "i") },
+	}).then(deletedDoc => {
+		if (deletedDoc.deletedCount > 0) {
+			// document successfully deleted
+			City.find().then(data => {
+				res.json({ result: true, weather: data });
+			});
+		} else {
+			res.json({ result: false, error: "City not found" });
+		}
+	});
 });
 
 module.exports = router;
