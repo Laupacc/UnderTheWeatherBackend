@@ -29,6 +29,8 @@ router.post('/current', (req, res) => {
 						cityName: req.body.cityName,
 						main: apiData.weather[0].main,
 						description: apiData.weather[0].description,
+						icon: apiData.weather[0].icon,
+						temp: apiData.main.temp,
 						feels_like: apiData.main.feels_like,
 						tempMin: apiData.main.temp_min,
 						tempMax: apiData.main.temp_max,
@@ -37,6 +39,8 @@ router.post('/current', (req, res) => {
 						clouds: apiData.clouds.all,
 						rain: apiData.rain ? apiData.rain['1h'] : 0,
 						snow: apiData.snow ? apiData.snow['1h'] : 0,
+						sunrise: apiData.sys.sunrise,
+						sunset: apiData.sys.sunset,
 					});
 
 					// Finally save in database

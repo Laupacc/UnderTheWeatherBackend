@@ -4,6 +4,8 @@ const citySchema = mongoose.Schema({
 	cityName: String,
 	main: String,
 	description: String,
+	icon: String,
+	temp: Number,
 	feels_like: Number,
 	tempMin: Number,
 	tempMax: Number,
@@ -11,7 +13,9 @@ const citySchema = mongoose.Schema({
 	wind: Number,
 	clouds: Number,
 	rain: Number,
-	snow: Number
+	snow: Number,
+	sunrise: Number,
+	sunset: Number
 });
 
 const City = mongoose.model('cities', citySchema);
