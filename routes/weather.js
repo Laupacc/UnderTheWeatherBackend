@@ -19,6 +19,7 @@ router.get('/', (req, res) => {
 router.post('/current', (req, res) => {
 	// Check if the city has not already been added
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
+		// If city does not exist in database
 		if (dbData === null) {
 			// Request OpenWeatherMap API for weather data
 			fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`)
