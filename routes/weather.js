@@ -97,14 +97,12 @@ router.post('/current/location', async (req, res) => {
 
 
 // Add city forecast
-router.post('/forecast', async (req, res) => {
+router.post('/forecast/:cityName', async (req, res) => {
 	try {
 		const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
 		const apiData = await response.json();
-
-		const existingForecast = await Forecast.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } });
-		if (existingForecast) {
-			res.json({ result: false, error: 'City already saved' });
+		if (apiData.cod !== '200') {
+			res.json({ result: false, error: apiData.message });
 			return;
 		}
 		const newForcast = new Forecast({
