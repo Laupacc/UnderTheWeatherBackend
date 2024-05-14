@@ -60,14 +60,9 @@ router.post('/current', (req, res) => {
 
 // Add city from user location
 router.post('/current/location', (req, res) => {
-	const lat = req.body.lat.replace(/[-,.]/g, '');
-	const lon = req.body.lon.replace(/[-,.]/g, '');
-
-	City.findOne({ latitude: lat, longitude: lon }).then(dbData => {
-		// Rest of your code...
-
+	City.findOne({ lattitude: req.body.lat, longitude: req.body.lon }).then(dbData => {
 		if (dbData === null) {
-			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric`)
+			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
 				.then(response => response.json())
 				.then(apiData => {
 					const newCity = new City({
@@ -91,12 +86,10 @@ router.post('/current/location', (req, res) => {
 					});
 					newCity.save().then(newDoc => {
 						res.json({ result: true, weather: newDoc });
-						console.log('New City added');
 					});
 				});
 		} else {
 			res.json({ result: false, error: 'City already saved' });
-			console.log('City already saved');
 		}
 	});
 });
