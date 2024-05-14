@@ -15,11 +15,14 @@ router.get('/', (req, res) => {
 });
 
 
+function normalizeCityName(cityName) {
+	return cityName.toLowerCase().replace(/-/g, '');
+}
 // Add city current weather
 router.post('/current', (req, res) => {
 	// Check if the city has not already been added
-	const cityName = req.body.cityName.replace(/-/g, '');
-	City.findOne({ cityName: { $regex: new RegExp('^' + cityName.split('').join('\\-?') + '$', 'i') } }).then(dbData => {
+	const cityName = normalizeCityName(req.body.cityName);
+	City.findOne({ cityName: { $regex: new RegExp('^' + cityName + '$', 'i') } }).then(dbData => {
 		// If city does not exist in database
 		if (dbData === null) {
 			// Request OpenWeatherMap API for weather data
