@@ -14,87 +14,46 @@ router.get('/', (req, res) => {
 	});
 });
 
-
 // Add city current weather
-router.post('/current', (req, res) => {
-	// Check if the city has not already been added
-	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
-		// If city does not exist in database
-		if (dbData === null) {
-			// Request OpenWeatherMap API for weather data
-			fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`)
-				.then(response => response.json())
-				.then(apiData => {
-					// Creates new document with weather data
-					const newCity = new City({
-						cityName: req.body.cityName,
-						main: apiData.weather[0].main,
-						description: apiData.weather[0].description,
-						icon: apiData.weather[0].icon,
-						temp: apiData.main.temp,
-						feels_like: apiData.main.feels_like,
-						tempMin: apiData.main.temp_min,
-						tempMax: apiData.main.temp_max,
-						humidity: apiData.main.humidity,
-						wind: apiData.wind.speed,
-						clouds: apiData.clouds.all,
-						rain: apiData.rain ? apiData.rain['1h'] : 0,
-						snow: apiData.snow ? apiData.snow['1h'] : 0,
-						sunrise: apiData.sys.sunrise,
-						sunset: apiData.sys.sunset,
-						lattitude: apiData.coord.lat,
-						longitude: apiData.coord.lon,
-					});
+router.post('/current', async (req, res) => {
+	try {
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
+		const apiData = await response.json();
 
-					// Finally save in database
-					newCity.save().then(newDoc => {
-						res.json({ result: true, weather: newDoc });
-					});
-				});
-		} else {
-			// City already exists in database
+		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } });
+		if (existingCity) {
 			res.json({ result: false, error: 'City already saved' });
+			return;
 		}
-	});
+		const newCity = new City({
+			cityName: req.body.cityName,
+			main: apiData.weather[0].main,
+			description: apiData.weather[0].description,
+			icon: apiData.weather[0].icon,
+			temp: apiData.main.temp,
+			feels_like: apiData.main.feels_like,
+			tempMin: apiData.main.temp_min,
+			tempMax: apiData.main.temp_max,
+			humidity: apiData.main.humidity,
+			wind: apiData.wind.speed,
+			clouds: apiData.clouds.all,
+			rain: apiData.rain ? apiData.rain['1h'] : 0,
+			snow: apiData.snow ? apiData.snow['1h'] : 0,
+			sunrise: apiData.sys.sunrise,
+			sunset: apiData.sys.sunset,
+			lattitude: apiData.coord.lat,
+			longitude: apiData.coord.lon,
+		});
+
+		const newDoc = await newCity.save();
+		res.json({ result: true, weather: newDoc });
+	} catch (error) {
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 
-// Add city from user location
-// router.post('/current/location', (req, res) => {
-// 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
-// 		// City.findOne({ lattitude: req.body.lat, longitude: req.body.lon }).then(dbData => {
-// 		if (dbData === null) {
-// 			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
-// 				.then(response => response.json())
-// 				.then(apiData => {
-// 					const newCity = new City({
-// 						cityName: apiData.name,
-// 						main: apiData.weather[0].main,
-// 						description: apiData.weather[0].description,
-// 						icon: apiData.weather[0].icon,
-// 						temp: apiData.main.temp,
-// 						feels_like: apiData.main.feels_like,
-// 						tempMin: apiData.main.temp_min,
-// 						tempMax: apiData.main.temp_max,
-// 						humidity: apiData.main.humidity,
-// 						wind: apiData.wind.speed,
-// 						clouds: apiData.clouds.all,
-// 						rain: apiData.rain ? apiData.rain['1h'] : 0,
-// 						snow: apiData.snow ? apiData.snow['1h'] : 0,
-// 						sunrise: apiData.sys.sunrise,
-// 						sunset: apiData.sys.sunset,
-// 						lattitude: apiData.coord.lat,
-// 						longitude: apiData.coord.lon,
-// 					});
-// 					newCity.save().then(newDoc => {
-// 						res.json({ result: true, weather: newDoc });
-// 					});
-// 				});
-// 		} else {
-// 			res.json({ result: false, error: 'City already saved' });
-// 		}
-// 	});
-// });
 
+// Add current location
 router.post('/current/location', async (req, res) => {
 	try {
 		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`);
@@ -134,63 +93,78 @@ router.post('/current/location', async (req, res) => {
 });
 
 
-
-
 // Add city forecast
-router.post('/forecast', (req, res) => {
-	// Check if the city has not already been added
-	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
-		if (dbData === null) {
-			// Request OpenWeatherMap API for forecast data
-			fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`)
-				.then(response => response.json())
-				.then(apiData => {
-					// Creates new document with forecast data
-					const newCity = new City({
-						cityName: req.body.cityName,
-						forecast: apiData.list,
-					});
+router.post('/forecast', async (req, res) => {
+	try {
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
+		const apiData = await response.json();
 
-					// Finally save in database
-					newCity.save().then(newDoc => {
-						res.json({ result: true, weather: newDoc });
-					});
-				});
-		} else {
-			// City already exists in database
+		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } });
+		if (existingCity) {
 			res.json({ result: false, error: 'City already saved' });
+			return;
 		}
-	});
+		const newCity = new City({
+			cityName: req.body.cityName,
+			forecast: apiData.list.map((forecast) => ({
+				date: forecast.dt,
+				main: forecast.weather[0].main,
+				description: forecast.weather[0].description,
+				icon: forecast.weather[0].icon,
+				temp: forecast.main.temp,
+				feels_like: forecast.main.feels_like,
+				tempMin: forecast.main.temp_min,
+				tempMax: forecast.main.temp_max,
+				humidity: forecast.main.humidity,
+				wind: forecast.wind.speed,
+				clouds: forecast.clouds.all,
+				rain: forecast.rain ? forecast.rain['1h'] : 0,
+				snow: forecast.snow ? forecast.snow['1h'] : 0,
+			})),
+		});
+		const newDoc = await newCity.save();
+		res.json({ result: true, weather: newDoc });
+	} catch (error) {
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 
 
 // Get city by name
-router.get("/:cityName", (req, res) => {
-	City.findOne({
-		cityName: { $regex: new RegExp(req.params.cityName, "i") },
-	}).then(data => {
+router.get("/:cityName", async (req, res) => {
+	try {
+		const data = await City.findOne({
+			cityName: { $regex: new RegExp(req.params.cityName, "i") },
+		});
+
 		if (data) {
 			res.json({ result: true, weather: data });
 		} else {
 			res.json({ result: false, error: "City not found" });
 		}
-	});
+	} catch (error) {
+		res.status(500).json({ result: false, error: "Internal Server Error" });
+	}
 });
 
 // Delete city by name
-router.delete("/:cityName", (req, res) => {
-	City.deleteOne({
-		cityName: { $regex: new RegExp(req.params.cityName, "i") },
-	}).then(deletedDoc => {
+router.delete("/:cityName", async (req, res) => {
+	try {
+		const deletedDoc = await City.deleteOne({
+			cityName: { $regex: new RegExp(req.params.cityName, "i") },
+		});
+
 		if (deletedDoc.deletedCount > 0) {
-			// document successfully deleted
-			City.find().then(data => {
-				res.json({ result: true, weather: data });
-			});
+			// Document successfully deleted
+			const data = await City.find();
+			res.json({ result: true, weather: data });
 		} else {
 			res.json({ result: false, error: "City not found" });
 		}
-	});
+	} catch (error) {
+		res.status(500).json({ result: false, error: "Internal Server Error" });
+	}
 });
+
 
 module.exports = router;
