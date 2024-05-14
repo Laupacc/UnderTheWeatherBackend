@@ -55,6 +55,42 @@ router.post('/current', (req, res) => {
 	});
 });
 
+// Add city from user location
+router.post('/current/location', (req, res) => {
+	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
+		if (dbData !== null) {
+			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
+				.then(response => response.json())
+				.then(apiData => {
+					const newCity = new City({
+						cityName: apiData.name,
+						main: apiData.weather[0].main,
+						description: apiData.weather[0].description,
+						icon: apiData.weather[0].icon,
+						temp: apiData.main.temp,
+						feels_like: apiData.main.feels_like,
+						tempMin: apiData.main.temp_min,
+						tempMax: apiData.main.temp_max,
+						humidity: apiData.main.humidity,
+						wind: apiData.wind.speed,
+						clouds: apiData.clouds.all,
+						rain: apiData.rain ? apiData.rain['1h'] : 0,
+						snow: apiData.snow ? apiData.snow['1h'] : 0,
+						sunrise: apiData.sys.sunrise,
+						sunset: apiData.sys.sunset,
+					});
+					newCity.save().then(newDoc => {
+						res.json({ result: true, weather: newDoc });
+					});
+				});
+		} else {
+			res.json({ result: false, error: 'City already saved' });
+		}
+	});
+});
+
+
+
 // Add city forecast
 router.post('/forecast', (req, res) => {
 	// Check if the city has not already been added
@@ -84,17 +120,17 @@ router.post('/forecast', (req, res) => {
 
 
 // Get city by name
-// router.get("/:cityName", (req, res) => {
-// 	City.findOne({
-// 		cityName: { $regex: new RegExp(req.params.cityName, "i") },
-// 	}).then(data => {
-// 		if (data) {
-// 			res.json({ result: true, weather: data });
-// 		} else {
-// 			res.json({ result: false, error: "City not found" });
-// 		}
-// 	});
-// });
+router.get("/:cityName", (req, res) => {
+	City.findOne({
+		cityName: { $regex: new RegExp(req.params.cityName, "i") },
+	}).then(data => {
+		if (data) {
+			res.json({ result: true, weather: data });
+		} else {
+			res.json({ result: false, error: "City not found" });
+		}
+	});
+});
 
 // Delete city by name
 router.delete("/:cityName", (req, res) => {
