@@ -60,7 +60,7 @@ router.post('/current', (req, res) => {
 
 // Add city from user location
 router.post('/current/location', (req, res) => {
-	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
+	City.findOne({ lattitude: req.body.lat, longitude: req.body.lon }).then(dbData => {
 		if (dbData === null) {
 			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
 				.then(response => response.json())
@@ -86,7 +86,7 @@ router.post('/current/location', (req, res) => {
 					});
 					newCity.save().then(newDoc => {
 						res.json({ result: true, weather: newDoc });
-						console.log(newDoc);
+						console.log('New City added');
 					});
 				});
 		} else {
