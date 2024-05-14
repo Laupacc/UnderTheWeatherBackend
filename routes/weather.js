@@ -3,7 +3,6 @@ var router = express.Router();
 
 const fetch = require('node-fetch');
 const City = require('../models/cities');
-const Forecast = require('../models/forecast');
 
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
@@ -106,41 +105,6 @@ router.get('/forecast/:cityName', async (req, res) => {
 		res.json({ result: true, weather: apiData });
 	}
 });
-
-// // Add city forecast
-// router.post('/forecast/:cityName', async (req, res) => {
-// 	try {
-// 		const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
-// 		const apiData = await response.json();
-// 		if (apiData.cod !== '200') {
-// 			res.json({ result: false, error: apiData.message });
-// 			return;
-// 		}
-// 		const newForcast = new Forecast({
-// 			cityName: apiData.city.name,
-// 			forecast: apiData.list.map((forecast) => ({
-// 				date: forecast.dt,
-// 				main: forecast.weather[0].main,
-// 				description: forecast.weather[0].description,
-// 				icon: forecast.weather[0].icon,
-// 				temp: forecast.main.temp,
-// 				feels_like: forecast.main.feels_like,
-// 				tempMin: forecast.main.temp_min,
-// 				tempMax: forecast.main.temp_max,
-// 				humidity: forecast.main.humidity,
-// 				wind: forecast.wind.speed,
-// 				clouds: forecast.clouds.all,
-// 				rain: forecast.rain ? forecast.rain['1h'] : 0,
-// 				snow: forecast.snow ? forecast.snow['1h'] : 0,
-// 			})),
-// 		});
-// 		const newDoc = await newForcast.save();
-// 		res.json({ result: true, weather: newDoc });
-// 	} catch (error) {
-// 		res.status(500).json({ result: false, error: 'Internal Server Error' });
-// 	}
-// });
-
 
 // Get city by name
 router.get("/:cityName", (req, res) => {
