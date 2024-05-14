@@ -67,7 +67,7 @@ router.post('/current/location', (req, res) => {
 		// Rest of your code...
 
 		if (dbData === null) {
-			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
+			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric`)
 				.then(response => response.json())
 				.then(apiData => {
 					const newCity = new City({
