@@ -18,9 +18,8 @@ router.get('/', (req, res) => {
 // Add city current weather
 router.post('/current', (req, res) => {
 	// Check if the city has not already been added
-	const cityNameRegex = new RegExp(req.body.cityName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i');
-
-	City.findOne({ cityName: { $regex: cityNameRegex } }).then(dbData => {
+	const cityName = req.body.cityName.replace(/-/g, '');
+	City.findOne({ cityName: { $regex: new RegExp('^' + cityName.split('').join('\\-?') + '$', 'i') } }).then(dbData => {
 		// If city does not exist in database
 		if (dbData === null) {
 			// Request OpenWeatherMap API for weather data
