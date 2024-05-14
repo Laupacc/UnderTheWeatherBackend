@@ -42,6 +42,8 @@ router.post('/current', (req, res) => {
 						snow: apiData.snow ? apiData.snow['1h'] : 0,
 						sunrise: apiData.sys.sunrise,
 						sunset: apiData.sys.sunset,
+						lattitude: apiData.coord.lat,
+						longitude: apiData.coord.lon,
 					});
 
 					// Finally save in database
@@ -79,6 +81,8 @@ router.post('/current/location', (req, res) => {
 						snow: apiData.snow ? apiData.snow['1h'] : 0,
 						sunrise: apiData.sys.sunrise,
 						sunset: apiData.sys.sunset,
+						lattitude: apiData.coord.lat,
+						longitude: apiData.coord.lon,
 					});
 					newCity.save().then(newDoc => {
 						res.json({ result: true, weather: newDoc });

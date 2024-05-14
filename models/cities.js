@@ -15,7 +15,9 @@ const citySchema = mongoose.Schema({
 	rain: Number,
 	snow: Number,
 	sunrise: Number,
-	sunset: Number
+	sunset: Number,
+	lattitude: Number,
+	longitude: Number
 });
 
 const City = mongoose.model('cities', citySchema);
