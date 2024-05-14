@@ -15,6 +15,12 @@ router.get('/', (req, res) => {
 	});
 });
 
+// Get all forecast from database
+router.get('/forecast', (req, res) => {
+	Forecast.find().then(data => {
+		res.json({ weather: data });
+	});
+});
 
 // Add city current weather
 router.post('/current', (req, res) => {
@@ -94,18 +100,6 @@ router.post('/current/location', async (req, res) => {
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
-
-router.get('/forecast/:cityName', (req, res) => {
-	Forecast.findOne({ cityName: { $regex: new RegExp(req.params.cityName, 'i') } }).then(data => {
-		if (data) {
-			res.json({ result: true, weather: data });
-		} else {
-			res.json({ result: false, error: 'City not found' });
-		}
-	});
-});
-
-
 
 // Add city forecast
 router.post('/forecast/:cityName', async (req, res) => {
