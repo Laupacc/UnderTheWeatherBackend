@@ -106,7 +106,7 @@ router.post('/forecast/:cityName', async (req, res) => {
 			return;
 		}
 		const newForcast = new Forecast({
-			cityName: req.body.cityName,
+			cityName: apiData.city.name,
 			forecast: apiData.list.map((forecast) => ({
 				date: forecast.dt,
 				main: forecast.weather[0].main,
