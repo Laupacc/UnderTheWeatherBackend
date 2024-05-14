@@ -60,7 +60,12 @@ router.post('/current', (req, res) => {
 
 // Add city from user location
 router.post('/current/location', (req, res) => {
-	City.findOne({ lattitude: req.body.lat, longitude: req.body.lon }).then(dbData => {
+	const lat = req.body.lat.replace(/[-,.]/g, '');
+	const lon = req.body.lon.replace(/[-,.]/g, '');
+
+	City.findOne({ latitude: lat, longitude: lon }).then(dbData => {
+		// Rest of your code...
+
 		if (dbData === null) {
 			fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`)
 				.then(response => response.json())
