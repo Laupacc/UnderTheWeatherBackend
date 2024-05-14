@@ -87,10 +87,12 @@ router.post('/current/location', (req, res) => {
 					});
 					newCity.save().then(newDoc => {
 						res.json({ result: true, weather: newDoc });
+						console.log(newDoc);
 					});
 				});
 		} else {
 			res.json({ result: false, error: 'City already saved' });
+			console.log('City already saved');
 		}
 	});
 });
