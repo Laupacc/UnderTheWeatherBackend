@@ -95,6 +95,17 @@ router.post('/current/location', async (req, res) => {
 	}
 });
 
+router.get('/forecast/:cityName', (req, res) => {
+	Forecast.findOne({ cityName: { $regex: new RegExp(req.params.cityName, 'i') } }).then(data => {
+		if (data) {
+			res.json({ result: true, weather: data });
+		} else {
+			res.json({ result: false, error: 'City not found' });
+		}
+	});
+});
+
+
 
 // Add city forecast
 router.post('/forecast/:cityName', async (req, res) => {
