@@ -3,6 +3,7 @@ var router = express.Router();
 
 const fetch = require('node-fetch');
 const City = require('../models/cities');
+const Forecast = require('../models/forecast');
 
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
@@ -101,12 +102,12 @@ router.post('/forecast', async (req, res) => {
 		const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
 		const apiData = await response.json();
 
-		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } });
-		if (existingCity) {
+		const existingForecast = await Forecast.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } });
+		if (existingForecast) {
 			res.json({ result: false, error: 'City already saved' });
 			return;
 		}
-		const newCity = new City({
+		const newForcast = new Forecast({
 			cityName: req.body.cityName,
 			forecast: apiData.list.map((forecast) => ({
 				date: forecast.dt,
@@ -124,7 +125,7 @@ router.post('/forecast', async (req, res) => {
 				snow: forecast.snow ? forecast.snow['1h'] : 0,
 			})),
 		});
-		const newDoc = await newCity.save();
+		const newDoc = await newForcast.save();
 		res.json({ result: true, weather: newDoc });
 	} catch (error) {
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
