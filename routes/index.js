@@ -11,12 +11,7 @@ router.get('/cityautocomplete', async (req, res) => {
 			return;
 		}
 		const apiData = await response.json();
-
-		// Extract all cities from the API response
-		const cities = apiData.data.reduce((acc, country) => {
-			acc.push(...country.cities);
-			return acc;
-		}, []);
+        const cities = apiData.data.map((country) => country.cities).flat();
 
 		res.json({ result: true, cities: cities });
 	} catch (error) {
