@@ -13,22 +13,28 @@ router.get('/cityautocomplete', async (req, res) => {
         }
         const apiData = await response.json();
 
-        const citiesWithCodes = [];
+        let cities = [];
         apiData.data.forEach((country) => {
             const countryCode = country.iso2;
-            const countryCities = country.cities.map(city => ({ name: city, iso2: countryCode }));
-            citiesWithCodes.push(...countryCities);
+            const countryCities = country.cities;
+
+            const countryCitiesMapped = countryCities.map((city) => {
+                return { name: city, iso2: countryCode };
+            });
+
+            cities = [...cities, ...countryCitiesMapped];
         });
 
         // Sort cities alphabetically
-        citiesWithCodes.sort((a, b) => a.name.localeCompare(b.name));
+        cities.sort((a, b) => a.name.localeCompare(b.name));
 
-        res.json({ result: true, cities: citiesWithCodes });
+        res.json({ result: true, cities: cities });
     } catch (error) {
         console.error(error);
         res.json({ result: false, error: 'Internal Server Error' });
     }
 });
+
 
 
 module.exports = router;
