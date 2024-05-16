@@ -135,4 +135,53 @@ router.delete("/:cityName", (req, res) => {
 	});
 });
 
+// Update city by name
+router.put("/:cityName", (req, res) => {
+	City.findOne({
+		cityName: { $regex: new RegExp(req.params.cityName, "i") },
+	}).then(data => {
+		if (data) {
+			data.cityName = req.body.cityName;
+			data.main = req.body.main;
+			data.description = req.body.description;
+			data.icon = req.body.icon;
+			data.temp = req.body.temp;
+			data.feels_like = req.body.feels_like;
+			data.tempMin = req.body.tempMin;
+			data.tempMax = req.body.tempMax;
+			data.humidity = req.body.humidity;
+			data.wind = req.body.wind;
+			data.clouds = req.body.clouds;
+			data.rain = req.body.rain;
+			data.snow = req.body.snow;
+			data.sunrise = req.body.sunrise;
+			data.sunset = req.body.sunset;
+			data.lattitude = req.body.lattitude;
+			data.longitude = req.body.longitude;
+
+			data.save().then(updatedDoc => {
+				res.json({ result: true, weather: updatedDoc });
+			});
+		} else {
+			res.json({ result: false, error: "City not found" });
+		}
+	});
+});
+
+// fetch citynames for autocomplete search bar
+router.get('/cityautocomplete', async (req, res) => {
+	try {
+		const response = await fetch('https://countriesnow.space/api/v0.1/countries');
+		const apiData = await response.json();
+		const cities = apiData.data.map(country => country.cities).flat();
+
+		res.json({ result: true, cities: cities });
+	} catch (error) {
+		res.json({ result: false, error: 'Internal Server Error' });
+	}
+});
+
+
+
+
 module.exports = router;
