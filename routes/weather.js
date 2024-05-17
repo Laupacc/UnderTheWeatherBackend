@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 	});
 });
 
-
+// First route
 // Add city current weather
 // router.post('/current', (req, res) => {
 // 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
@@ -55,34 +55,76 @@ router.get('/', (req, res) => {
 // 	});
 // });
 
+// Second route
+// router.post('/current', (req, res) => {
+// 	const updateThreshold = 900000; // 15 minutes in milliseconds
+
+// 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
+// 		if (dbData === null) {
+// 			// City not found in database, fetch from API and save
+// 			fetchWeatherAndUpdate(req.body.cityName, res);
+// 		} else {
+// 			// Check if data needs to be updated
+// 			const now = Date.now();
+// 			if (now - new Date(dbData.lastUpdated).getTime() > updateThreshold) {
+// 				// Data is outdated, fetch from API and update
+// 				fetchWeatherAndUpdate(req.body.cityName, res, dbData._id);
+// 			} else {
+// 				// Return existing data
+// 				res.json({ result: true, weather: dbData });
+// 			}
+// 		}
+// 	}).catch(err => res.status(500).json({ result: false, error: err.message }));
+// });
+
+// function fetchWeatherAndUpdate(cityName, res, cityId = null) {
+// 	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`)
+// 		.then(response => response.json())
+// 		.then(apiData => {
+// 			const cityData = {
+// 				cityName,
+// 				main: apiData.weather[0].main,
+// 				description: apiData.weather[0].description,
+// 				icon: apiData.weather[0].icon,
+// 				temp: apiData.main.temp,
+// 				feels_like: apiData.main.feels_like,
+// 				tempMin: apiData.main.temp_min,
+// 				tempMax: apiData.main.temp_max,
+// 				humidity: apiData.main.humidity,
+// 				wind: apiData.wind.speed,
+// 				clouds: apiData.clouds.all,
+// 				rain: apiData.rain ? apiData.rain['1h'] : 0,
+// 				snow: apiData.snow ? apiData.snow['1h'] : 0,
+// 				sunrise: apiData.sys.sunrise,
+// 				sunset: apiData.sys.sunset,
+// 				latitude: apiData.coord.lat,
+// 				longitude: apiData.coord.lon,
+// 				lastUpdated: Date.now()
+// 			};
+
+// 			if (cityId) {
+// 				// Update existing document
+// 				City.findByIdAndUpdate(cityId, cityData, { new: true }).then(updatedDoc => {
+// 					res.json({ result: true, weather: updatedDoc });
+// 				}).catch(err => res.status(500).json({ result: false, error: err.message }));
+// 			} else {
+// 				// Create new document
+// 				const newCity = new City(cityData);
+// 				newCity.save().then(newDoc => {
+// 					res.json({ result: true, weather: newDoc });
+// 				}).catch(err => res.status(500).json({ result: false, error: err.message }));
+// 			}
+// 		}).catch(err => res.status(500).json({ result: false, error: err.message }));
+// }
+
 
 router.post('/current', (req, res) => {
-	const updateThreshold = 900000; // 15 minutes in milliseconds
-
-	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
-		if (dbData === null) {
-			// City not found in database, fetch from API and save
-			fetchWeatherAndUpdate(req.body.cityName, res);
-		} else {
-			// Check if data needs to be updated
-			const now = Date.now();
-			if (now - new Date(dbData.lastUpdated).getTime() > updateThreshold) {
-				// Data is outdated, fetch from API and update
-				fetchWeatherAndUpdate(req.body.cityName, res, dbData._id);
-			} else {
-				// Return existing data
-				res.json({ result: true, weather: dbData });
-			}
-		}
-	}).catch(err => res.status(500).json({ result: false, error: err.message }));
-});
-
-function fetchWeatherAndUpdate(cityName, res, cityId = null) {
-	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`)
+	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`)
 		.then(response => response.json())
 		.then(apiData => {
-			const cityData = {
-				cityName,
+			// Prepare new weather data
+			const weatherData = {
+				cityName: req.body.cityName,
 				main: apiData.weather[0].main,
 				description: apiData.weather[0].description,
 				icon: apiData.weather[0].icon,
@@ -99,23 +141,18 @@ function fetchWeatherAndUpdate(cityName, res, cityId = null) {
 				sunset: apiData.sys.sunset,
 				latitude: apiData.coord.lat,
 				longitude: apiData.coord.lon,
-				lastUpdated: Date.now()
 			};
 
-			if (cityId) {
-				// Update existing document
-				City.findByIdAndUpdate(cityId, cityData, { new: true }).then(updatedDoc => {
-					res.json({ result: true, weather: updatedDoc });
-				}).catch(err => res.status(500).json({ result: false, error: err.message }));
-			} else {
-				// Create new document
-				const newCity = new City(cityData);
-				newCity.save().then(newDoc => {
-					res.json({ result: true, weather: newDoc });
-				}).catch(err => res.status(500).json({ result: false, error: err.message }));
-			}
-		}).catch(err => res.status(500).json({ result: false, error: err.message }));
-}
+			// Update the city's weather data in the database, or create a new document if it doesn't exist
+			City.findOneAndUpdate(
+				{ cityName: { $regex: new RegExp(req.body.cityName, 'i') } },
+				weatherData,
+				{ new: true, upsert: true }
+			).then(newDoc => {
+				res.json({ result: true, weather: newDoc });
+			});
+		});
+});
 
 
 // Add current location
