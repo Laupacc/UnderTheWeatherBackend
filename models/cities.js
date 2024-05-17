@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const citySchema = mongoose.Schema({
-	cityName: String,
+	cityName: { type: String, required: true, unique: true },
 	main: String,
 	description: String,
 	icon: String,
@@ -17,7 +17,8 @@ const citySchema = mongoose.Schema({
 	sunrise: Number,
 	sunset: Number,
 	lattitude: Number,
-	longitude: Number
+	longitude: Number,
+	lastUpdated: { type: Date, default: Date.now }
 });
 
 const City = mongoose.model('cities', citySchema);
