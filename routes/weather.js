@@ -9,15 +9,12 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 // Get all cities from database
 router.get('/', (req, res) => {
-	City.findOneandUpdate({}).then(data => {
-		if (data) {
-			res.json({ result: true, weather: data });
-		} else {
-			res.json({ result: false, error: 'No cities found' });
-		}
+	City.find().then(data => {
+		res.json({ weather: data });
 	});
 });
 
+// First route
 // Add city current weather
 router.post('/current', (req, res) => {
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
