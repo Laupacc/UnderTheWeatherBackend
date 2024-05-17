@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 // 						snow: apiData.snow ? apiData.snow['1h'] : 0,
 // 						sunrise: apiData.sys.sunrise,
 // 						sunset: apiData.sys.sunset,
-// 						lattitude: apiData.coord.lat,
+// 						latitude: apiData.coord.lat,
 // 						longitude: apiData.coord.lon,
 // 					});
 
@@ -57,7 +57,7 @@ router.get('/', (req, res) => {
 
 
 router.post('/current', (req, res) => {
-	const updateThreshold = 900000; // 1 hour in milliseconds
+	const updateThreshold = 900000; // 15 minutes in milliseconds
 
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
 		if (dbData === null) {
@@ -146,7 +146,7 @@ router.post('/current/location', async (req, res) => {
 			snow: apiData.snow ? apiData.snow['1h'] : 0,
 			sunrise: apiData.sys.sunrise,
 			sunset: apiData.sys.sunset,
-			lattitude: apiData.coord.lat,
+			latitude: apiData.coord.lat,
 			longitude: apiData.coord.lon,
 		});
 

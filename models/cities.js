@@ -16,7 +16,7 @@ const citySchema = mongoose.Schema({
 	snow: Number,
 	sunrise: Number,
 	sunset: Number,
-	lattitude: Number,
+	latitude: Number,
 	longitude: Number,
 	lastUpdated: { type: Date, default: Date.now }
 });
