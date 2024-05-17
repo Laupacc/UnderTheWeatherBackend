@@ -14,15 +14,7 @@ router.get('/', (req, res) => {
 	});
 });
 
-// Get all updated cities from database
-router.get('/updated', (req, res) => {
-	City.findOneandUpdate().then(data => {
-		res.json({ weather: data });
-	});
-});
 
-
-// First route
 // Add city current weather
 router.post('/current', (req, res) => {
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
@@ -62,8 +54,6 @@ router.post('/current', (req, res) => {
 		}
 	});
 });
-
-
 
 // Add current location
 router.post('/current/location', async (req, res) => {
