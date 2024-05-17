@@ -14,6 +14,14 @@ router.get('/', (req, res) => {
 	});
 });
 
+// Get all updated cities from database
+router.get('/updated', (req, res) => {
+	City.findOneandUpdate().then(data => {
+		res.json({ weather: data });
+	});
+});
+
+
 // First route
 // Add city current weather
 router.post('/current', (req, res) => {
