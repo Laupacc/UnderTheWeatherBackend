@@ -123,7 +123,7 @@ router.post('/current', (req, res) => {
 		.then(response => response.json())
 		.then(apiData => {
 			// Prepare new weather data
-			const weatherData = {
+			const newCity = new City ({
 				cityName: req.body.cityName,
 				main: apiData.weather[0].main,
 				description: apiData.weather[0].description,
@@ -141,12 +141,12 @@ router.post('/current', (req, res) => {
 				sunset: apiData.sys.sunset,
 				latitude: apiData.coord.lat,
 				longitude: apiData.coord.lon,
-			};
+			});
 
 			// Update the city's weather data in the database, or create a new document if it doesn't exist
 			City.findOneAndUpdate(
 				{ cityName: { $regex: new RegExp(req.body.cityName, 'i') } },
-				weatherData,
+				newCity,
 				{ new: true, upsert: true }
 			).then(newDoc => {
 				res.json({ result: true, weather: newDoc });
