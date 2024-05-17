@@ -14,6 +14,17 @@ router.get('/', (req, res) => {
 	});
 });
 
+// Get all weather data from api
+router.get('/update/:cityName', (req, res) => {
+	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`)
+		.then(response => response.json())
+		.then(apiData => {
+			res.json({ weather: apiData });
+		})
+		.catch(error => {
+			res.json({ result: false, error: error.message });
+		});
+});
 
 // Add city current weather
 router.post('/current', (req, res) => {
