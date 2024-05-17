@@ -57,7 +57,7 @@ router.get('/', (req, res) => {
 
 
 router.post('/current', (req, res) => {
-	const updateThreshold = 3600000; // 1 hour in milliseconds
+	const updateThreshold = 900000; // 1 hour in milliseconds
 
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
 		if (dbData === null) {
