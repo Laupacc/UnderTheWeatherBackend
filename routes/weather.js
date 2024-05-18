@@ -7,13 +7,6 @@ const City = require('../models/cities');
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
-// Get all cities from database
-router.get('/', (req, res) => {
-	City.find().then(data => {
-		res.json({ weather: data });
-	});
-});
-
 // Update weather data for a specific city
 const updateCityWeather = async (cityName) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
@@ -57,6 +50,13 @@ router.get('/updateAll', async (req, res) => {
 		console.error("Error updating cities:", error);
 		res.json({ result: false, error: error.message });
 	}
+});
+
+// Get all cities from database
+router.get('/', (req, res) => {
+	City.find().then(data => {
+		res.json({ weather: data });
+	});
 });
 
 // Get all weather data from api
