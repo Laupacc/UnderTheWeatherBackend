@@ -15,16 +15,17 @@ router.get('/', (req, res) => {
 });
 
 // Get all weather data from api
-router.get('/update/:cityName', (req, res) => {
-	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`)
-		.then(response => response.json())
-		.then(apiData => {
-			res.json({ weather: apiData });
-		})
-		.catch(error => {
-			res.json({ result: false, error: error.message });
-		});
+router.get('/update/:cityName', async (req, res) => {
+	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`)
+	const apiData = await response.json();
+	if (apiData.cod !== '200') {
+		res.json({ result: false, error: apiData.message });
+		return;
+	} else {
+		res.json({ result: true, weather: apiData });
+	}
 });
+
 
 // Add city current weather
 router.post('/current', (req, res) => {
