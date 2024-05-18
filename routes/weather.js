@@ -46,7 +46,7 @@ const updateCityWeather = async (cityName) => {
 };
 
 // Update all saved cities
-router.get('/update-all', async (req, res) => {
+router.get('/updateAll', async (req, res) => {
 	try {
 		const cities = await City.find({});
 		const updatePromises = cities.map(city => updateCityWeather(city.cityName));
