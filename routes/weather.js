@@ -14,6 +14,51 @@ router.get('/', (req, res) => {
 	});
 });
 
+// Update weather data for a specific city
+const updateCityWeather = async (cityName) => {
+	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
+	const apiData = await response.json();
+	if (apiData.cod === 200) {
+		// Update city document with new data
+		await City.findOneAndUpdate(
+			{ cityName: cityName },
+			{
+				main: apiData.weather[0].main,
+				description: apiData.weather[0].description,
+				icon: apiData.weather[0].icon,
+				temp: apiData.main.temp,
+				feels_like: apiData.main.feels_like,
+				tempMin: apiData.main.temp_min,
+				tempMax: apiData.main.temp_max,
+				humidity: apiData.main.humidity,
+				wind: apiData.wind.speed,
+				clouds: apiData.clouds.all,
+				rain: apiData.rain ? apiData.rain['1h'] : 0,
+				snow: apiData.snow ? apiData.snow['1h'] : 0,
+				sunrise: apiData.sys.sunrise,
+				sunset: apiData.sys.sunset,
+				latitude: apiData.coord.lat,
+				longitude: apiData.coord.lon,
+			},
+			{ new: true } // Return the updated document
+		);
+	}
+};
+
+// Update all saved cities
+router.get('/update-all', async (req, res) => {
+	try {
+		const cities = await City.find({});
+		const updatePromises = cities.map(city => updateCityWeather(city.cityName));
+		await Promise.all(updatePromises);
+		console.log("All cities updated successfully");
+		res.json({ result: true, message: 'All cities updated successfully' });
+	} catch (error) {
+		console.error("Error updating cities:", error);
+		res.json({ result: false, error: error.message });
+	}
+});
+
 // Get all weather data from api
 router.get('/update/:cityName', async (req, res) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`)
