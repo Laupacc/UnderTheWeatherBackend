@@ -69,6 +69,7 @@ router.post('/current', (req, res) => {
 					// Creates new document with weather data
 					const newCity = new City({
 						cityName: req.body.cityName,
+						country: apiData.sys.country,
 						main: apiData.weather[0].main,
 						description: apiData.weather[0].description,
 						icon: apiData.weather[0].icon,
@@ -113,6 +114,7 @@ router.post('/current/location', async (req, res) => {
 
 		const newCity = new City({
 			cityName: apiData.name,
+			country: apiData.sys.country,
 			main: apiData.weather[0].main,
 			description: apiData.weather[0].description,
 			icon: apiData.weather[0].icon,
