@@ -39,21 +39,23 @@ const fetch = require('node-fetch');
 // Get all cities from API for autocomplete feature
 router.get('/cityautocomplete', async (req, res) => {
     try {
-        const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`);
-        if (apiData.cod !== '200') {
-            res.json({ result: false, error: apiData.message });
+        const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${req.query.cityName}&appid=${OWM_API_KEY}&units=metric`);
+        if (!response.ok) {
+            res.json({ result: false, error: 'An error occurred while fetching the city names' });
+            return;
         }
-
         const apiData = await response.json();
 
-        let cities = [];
-        apiData.list.forEach((city) => {
-            const countryName = city.sys.country;
-            const countriesMapped = city.map((city) => {
-                return { name: city, country: countryName };
-            });
-            cities = [...cities, ...countriesMapped];
-        });
+        if (!apiData.list) {
+            res.json({ result: false, error: 'No cities found' });
+            return;
+        }
+
+        const cities = apiData.list.map(city => ({
+            name: city.name,
+            country: city.sys.country
+        }));
+
         cities.sort((a, b) => a.name.localeCompare(b.name));
         res.json({ result: true, cities: cities });
     } catch (error) {
@@ -61,6 +63,7 @@ router.get('/cityautocomplete', async (req, res) => {
         res.json({ result: false, error: 'Internal Server Error' });
     }
 });
+
 
 
 
