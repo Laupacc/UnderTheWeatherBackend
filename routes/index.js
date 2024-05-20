@@ -39,40 +39,30 @@ const fetch = require('node-fetch');
 // Get all cities from API for autocomplete feature
 router.get('/cityautocomplete', async (req, res) => {
     try {
-        const cityName = req.query.cityName; // Get cityName from query parameters
-        if (!cityName) {
-            res.json({ result: false, error: 'City name is required' });
-            return;
-        }
-
-        const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
+        const response = await fetch(`http://api.openweathermap.org/data/2.5/find&appid=${OWM_API_KEY}&units=metric`);
         if (!response.ok) {
             res.json({ result: false, error: 'An error occurred while fetching the city names' });
             return;
         }
         const apiData = await response.json();
 
-        if (!apiData.list) {
-            res.json({ result: false, error: 'No cities found' });
-            return;
-        }
+        let cities = [];
+        apiData.list.forEach((city) => {
+            const cityName = city.name;
+            const country = city.sys.country;
 
-        const cities = apiData.list.map(city => ({
-            name: city.name,
-            country: city.sys.country
-        }));
+            cities.push({ name: cityName, country: country });
+        });
 
+        // Sort cities alphabetically
         cities.sort((a, b) => a.name.localeCompare(b.name));
+
         res.json({ result: true, cities: cities });
     } catch (error) {
         console.error(error);
-        res.json({ result: false, error: 'Internal Server Error' });
+        res.json({ result: false, error: 'Internal Problem' });
     }
 });
-
-
-
-
 
 
 
