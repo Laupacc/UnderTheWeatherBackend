@@ -39,7 +39,13 @@ const fetch = require('node-fetch');
 // Get all cities from API for autocomplete feature
 router.get('/cityautocomplete', async (req, res) => {
     try {
-        const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${req.query.cityName}&appid=${OWM_API_KEY}&units=metric`);
+        const cityName = req.query.cityName; // Get cityName from query parameters
+        if (!cityName) {
+            res.json({ result: false, error: 'City name is required' });
+            return;
+        }
+
+        const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
         if (!response.ok) {
             res.json({ result: false, error: 'An error occurred while fetching the city names' });
             return;
@@ -63,6 +69,7 @@ router.get('/cityautocomplete', async (req, res) => {
         res.json({ result: false, error: 'Internal Server Error' });
     }
 });
+
 
 
 
