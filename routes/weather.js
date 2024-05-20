@@ -63,7 +63,7 @@ router.get('/', (req, res) => {
 // Get all cities from API for autocomplete feature
 router.get('/cityautocomplete', async (req, res) => {
 	try {
-		const response = await fetch('`http://api.openweathermap.org/data/2.5/find?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`');
+		const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`);
 		const apiData = await response.json();
 		if (apiData.cod !== '200') {
 			res.json({ result: false, error: apiData.message });
