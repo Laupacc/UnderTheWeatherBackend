@@ -17,6 +17,7 @@ const updateCityWeather = async (cityName) => {
 			{ cityName: cityName },
 			{
 				main: apiData.weather[0].main,
+				country: apiData.sys.country,
 				description: apiData.weather[0].description,
 				icon: apiData.weather[0].icon,
 				temp: apiData.main.temp,
