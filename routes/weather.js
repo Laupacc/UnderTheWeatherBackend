@@ -59,24 +59,6 @@ router.get('/', (req, res) => {
 	});
 });
 
-
-// Get all cities from API for autocomplete feature
-router.get('/cityautocomplete', async (req, res) => {
-	try {
-		const response = await fetch(`http://api.openweathermap.org/data/2.5/find?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`);
-		const apiData = await response.json();
-		if (apiData.cod !== '200') {
-			res.json({ result: false, error: apiData.message });
-		}
-		const cities = apiData.list.map(city => city.name);
-		res.json({ result: true, cities });
-	} catch (error) {
-		res.json({ result: false, error: 'An error occurred while fetching the city names' });
-	}
-});
-
-
-
 // Add city current weather
 router.post('/current', (req, res) => {
 	City.findOne({ cityName: { $regex: new RegExp(req.body.cityName, 'i') } }).then(dbData => {
