@@ -33,6 +33,7 @@ const updateCityWeather = async (cityName) => {
 				sunset: apiData.sys.sunset,
 				latitude: apiData.coord.lat,
 				longitude: apiData.coord.lon,
+				timezone: apiData.timezone,
 			},
 			{ new: true } // Return the updated document
 		);
@@ -87,6 +88,7 @@ router.post('/current', (req, res) => {
 						sunset: apiData.sys.sunset,
 						latitude: apiData.coord.lat,
 						longitude: apiData.coord.lon,
+						timezone: apiData.timezone,
 					});
 
 					// Finally save in database
@@ -132,6 +134,7 @@ router.post('/current/location', async (req, res) => {
 			sunset: apiData.sys.sunset,
 			latitude: apiData.coord.lat,
 			longitude: apiData.coord.lon,
+			timezone: apiData.timezone,
 		});
 
 		const newDoc = await newCity.save();

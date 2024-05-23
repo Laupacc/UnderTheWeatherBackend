@@ -19,6 +19,7 @@ const citySchema = mongoose.Schema({
 	sunset: Number,
 	latitude: Number,
 	longitude: Number,
+	timezone: Number,
 });
 
 const City = mongoose.model('cities', citySchema);
