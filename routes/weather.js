@@ -69,10 +69,10 @@ router.post('/addCity', async (req, res) => {
 
 		// Check if cityName or lat/lon is provided in the request
 		if (req.body.cityName) {
-			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${process.env.OWM_API_KEY}&units=metric`);
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
 			apiData = await response.json();
 		} else if (req.body.lat && req.body.lon) {
-			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${process.env.OWM_API_KEY}&units=metric`);
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`);
 			apiData = await response.json();
 		} else {
 			return res.json({ result: false, error: 'Missing cityName or lat/lon in request body' });
