@@ -52,67 +52,67 @@ router.post('/signin', (req, res) => {
     });
 });
 
-// router.post('/addCity', (req, res) => {
+router.post('/addCity', (req, res) => {
+    if (!checkBody(req.body, ['username', 'cityName'])) {
+        res.json({ result: false, error: 'Missing or empty fields' });
+        return;
+    }
+
+    User.findOne({ username: req.body.username }).then(user => {
+        if (user) {
+            City.findOne({ cityName: req.body.cityName }).then(city => {
+                if (city) {
+                    if (user.cities.includes(city._id)) {
+                        res.json({ result: false, error: 'City already in list' });
+                        return;
+                    }
+                    user.cities.push(city._id);
+                    user.save().then(() => {
+                        res.json({ result: true, message: 'City added successfully' });
+                    }).catch(err => {
+                        res.json({ result: false, error: err.message });
+                    });
+                } else {
+                    res.json({ result: false, error: 'City not found' });
+                }
+            }).catch(err => {
+                res.json({ result: false, error: err.message });
+            });
+        } else {
+            res.json({ result: false, error: 'User not found' });
+        }
+    }).catch(err => {
+        res.json({ result: false, error: err.message });
+    });
+});
+
+
+// router.post('/addCity', async (req, res) => {
 //     if (!checkBody(req.body, ['username', 'cityName'])) {
-//         res.json({ result: false, error: 'Missing or empty fields' });
-//         return;
+//         return res.json({ result: false, error: 'Missing or empty fields' });
 //     }
 
-//     User.findOne({ username: req.body.username }).then(user => {
-//         if (user) {
-//             City.findOne({ name: req.body.cityName }).then(city => {
-//                 if (city) {
-//                     if (user.cities.includes(city._id)) {
-//                         res.json({ result: false, error: 'City already in list' });
-//                         return;
-//                     }
-//                     user.cities.push(city._id);
-//                     user.save().then(() => {
-//                         res.json({ result: true, message: 'City added successfully' });
-//                     }).catch(err => {
-//                         res.json({ result: false, error: err.message });
-//                     });
-//                 } else {
-//                     res.json({ result: false, error: 'City not found' });
-//                 }
-//             }).catch(err => {
-//                 res.json({ result: false, error: err.message });
-//             });
-//         } else {
-//             res.json({ result: false, error: 'User not found' });
+//     try {
+//         const user = await User.findOne({ username: req.body.username });
+//         if (!user) {
+//             return res.json({ result: false, error: 'User not found' });
 //         }
-//     }).catch(err => {
+
+//         const city = await City.findOne({ cityName: req.body.cityName });
+//         if (!city) {
+//             return res.json({ result: false, error: 'City not found' });
+//         }
+
+//         if (user.cities.includes(city._id)) {
+//             return res.json({ result: false, error: 'City already in list' });
+//         }
+
+//         user.cities.push(city._id);
+//         await user.save();
+//         res.json({ result: true, message: 'City added successfully' });
+//     } catch (err) {
 //         res.json({ result: false, error: err.message });
-//     });
+//     }
 // });
-
-
-router.post('/addCity', async (req, res) => {
-    if (!checkBody(req.body, ['username', 'cityName'])) {
-        return res.json({ result: false, error: 'Missing or empty fields' });
-    }
-
-    try {
-        const user = await User.findOne({ username: req.body.username });
-        if (!user) {
-            return res.json({ result: false, error: 'User not found' });
-        }
-
-        const city = await City.findOne({ cityName: req.body.cityName });
-        if (!city) {
-            return res.json({ result: false, error: 'City not found' });
-        }
-
-        if (user.cities.includes(city._id)) {
-            return res.json({ result: false, error: 'City already in list' });
-        }
-
-        user.cities.push(city._id);
-        await user.save();
-        res.json({ result: true, message: 'City added successfully' });
-    } catch (err) {
-        res.json({ result: false, error: err.message });
-    }
-});
 
 module.exports = router;
