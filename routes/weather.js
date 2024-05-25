@@ -3,6 +3,7 @@ var router = express.Router();
 
 const fetch = require('node-fetch');
 const City = require('../models/cities');
+const User = require('../models/users');
 
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
@@ -59,6 +60,62 @@ router.get('/', (req, res) => {
 	City.find().then(data => {
 		res.json({ weather: data });
 	});
+});
+
+
+router.post('/addCity', async (req, res) => {
+	try {
+		let apiData;
+
+		// Check if cityName or lat/lon is provided in the request
+		if (req.body.cityName) {
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${process.env.OWM_API_KEY}&units=metric`);
+			apiData = await response.json();
+		} else if (req.body.lat && req.body.lon) {
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${process.env.OWM_API_KEY}&units=metric`);
+			apiData = await response.json();
+		} else {
+			return res.json({ result: false, error: 'Missing cityName or lat/lon in request body' });
+		}
+
+		// Check if city already exists in the database
+		const existingCity = await City.findOne({ cityName: apiData.name });
+		if (existingCity) {
+			return res.json({ result: false, error: 'City already saved' });
+		}
+
+		// Create a new City document
+		const newCity = new City({
+			cityName: apiData.name,
+			country: apiData.sys.country,
+			main: apiData.weather[0].main,
+			description: apiData.weather[0].description,
+			icon: apiData.weather[0].icon,
+			temp: apiData.main.temp,
+			feels_like: apiData.main.feels_like,
+			tempMin: apiData.main.temp_min,
+			tempMax: apiData.main.temp_max,
+			humidity: apiData.main.humidity,
+			wind: apiData.wind.speed,
+			clouds: apiData.clouds.all,
+			rain: apiData.rain ? apiData.rain['1h'] : 0,
+			snow: apiData.snow ? apiData.snow['1h'] : 0,
+			sunrise: apiData.sys.sunrise,
+			sunset: apiData.sys.sunset,
+			latitude: apiData.coord.lat,
+			longitude: apiData.coord.lon,
+			timezone: apiData.timezone,
+		});
+
+		// Save the new city to the database
+		const savedCity = await newCity.save();
+
+		// Return success response with the newly added city data
+		res.json({ result: true, weather: savedCity });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 
 // Add city current weather
@@ -184,6 +241,7 @@ router.delete("/:cityName", (req, res) => {
 		}
 	});
 });
+
 
 
 

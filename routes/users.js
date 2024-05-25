@@ -87,33 +87,32 @@ router.post('/signin', (req, res) => {
 // });
 
 
-router.post('/addCity', async (req, res) => {
-    if (!checkBody(req.body, ['username', 'cityName'])) {
-        return res.json({ result: false, error: 'Missing or empty fields' });
-    }
+// router.post('/addCity', async (req, res) => {
+//     if (!checkBody(req.body, ['username', 'cityName'])) {
+//         return res.json({ result: false, error: 'Missing or empty fields' });
+//     }
 
-    try {
-        const user = await User.findOne({ username: req.body.username });
-        if (!user) {
-            return res.json({ result: false, error: 'User not found' });
-        }
-        const response = fetch(`https://under-the-weather-backend.vercel.app/weather/current/${req.body.cityName}`);
-        const data = await response.json();
-        if (data.result) {
-            if (user.cities.includes(data.weather._id)) {
-                return res.json({ result: false, error: 'City already in list' });
-            }
-            user.cities.push(data.weather._id);
-            await user.save();
-            return res.json({ result: true, message: 'City added successfully' });
-        } else {
-            return res.json({ result: false, error: 'City not found' });
-        }
-    } catch (error) {
-        return res.json({ result: false, error: error.message });
-    }
-}
-);
+//     try {
+//         const user = await User.findOne({ username: req.body.username });
+//         if (!user) {
+//             return res.json({ result: false, error: 'User not found' });
+//         }
 
+//         const city = await City.findOne({ cityName: req.body.cityName });
+//         if (!city) {
+//             return res.json({ result: false, error: 'City not found' });
+//         }
+
+//         if (user.cities.includes(city._id)) {
+//             return res.json({ result: false, error: 'City already in list' });
+//         }
+
+//         user.cities.push(city._id);
+//         await user.save();
+//         res.json({ result: true, message: 'City added successfully' });
+//     } catch (err) {
+//         res.json({ result: false, error: err.message });
+//     }
+// });
 
 module.exports = router;
