@@ -4,7 +4,7 @@ const userSchema = mongoose.Schema({
     username: String,
     password: String,
     token: String,
-    cities: [String],
+    cities: [{ type: Schema.Types.ObjectId, ref: 'City' }],
 });
 
 const User = mongoose.model('users', userSchema);

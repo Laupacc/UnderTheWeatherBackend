@@ -3,6 +3,7 @@ var router = express.Router();
 
 require('../models/connection');
 const User = require('../models/users');
+const City = require('../models/cities');
 const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
@@ -59,13 +60,21 @@ router.post('/addCity', (req, res) => {
 
     User.findOne({ username: req.body.username }).then(user => {
         if (user) {
-            if (user.cities.includes(req.body.cityName)) {
-                res.json({ result: false, error: 'City already in list' });
-                return;
-            }
-            user.cities.push(req.body.cityName);
-            user.save().then(() => {
-                res.json({ result: true, message: 'City added successfully' });
+            City.findOne({ name: req.body.cityName }).then(city => {
+                if (city) {
+                    if (user.cities.includes(city._id)) {
+                        res.json({ result: false, error: 'City already in list' });
+                        return;
+                    }
+                    user.cities.push(city._id);
+                    user.save().then(() => {
+                        res.json({ result: true, message: 'City added successfully' });
+                    }).catch(err => {
+                        res.json({ result: false, error: err.message });
+                    });
+                } else {
+                    res.json({ result: false, error: 'City not found' });
+                }
             }).catch(err => {
                 res.json({ result: false, error: err.message });
             });
