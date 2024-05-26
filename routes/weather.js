@@ -72,8 +72,7 @@ router.get('/userCities', async (req, res) => {
 
 		res.json({ result: true, cities: user.cities });
 	} catch (error) {
-		console.error("Error fetching user cities:", error.message);
-		console.error("Stack trace:", error.stack);
+		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
