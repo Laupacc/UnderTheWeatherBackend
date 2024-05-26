@@ -62,21 +62,6 @@ router.get('/', (req, res) => {
 	});
 });
 
-// Get all cities from user database
-router.get('/user/:username', async (req, res) => {
-	try {
-		const user = await User.findOne({ username: req.params.username }).populate('cities');
-		console.log({ "USERNAME": req.params.username, "USER": user, "CITIES": user.cities });
-		if (!user) {
-			res.json({ result: false, error: 'User not found again' });
-			return;
-		}
-		res.json({ result: true, cities: user.cities });
-	} catch (error) {
-		res.status(500).json({ result: false, error: error.message });
-	}
-});
-
 
 router.post('/addCity', async (req, res) => {
 	if (!checkBody(req.body, ['token',])) {
