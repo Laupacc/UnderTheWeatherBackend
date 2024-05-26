@@ -56,11 +56,11 @@ router.get('/updateAll', async (req, res) => {
 });
 
 // Get all cities from database
-// router.get('/', (req, res) => {
-// 	City.find().then(data => {
-// 		res.json({ weather: data });
-// 	});
-// });
+router.get('/', (req, res) => {
+	City.find().then(data => {
+		res.json({ weather: data });
+	});
+});
 
 // Get all cities from user database
 router.get('/user/:token', async (req, res) => {
