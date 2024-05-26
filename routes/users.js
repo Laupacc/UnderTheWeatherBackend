@@ -56,9 +56,9 @@ router.post('/signin', (req, res) => {
 });
 
 // Get all cities from user database
-router.get('/:token', async (req, res) => {
+router.get('/token', async (req, res) => {
     try {
-        const user = await User.findOne({ token: req.params.token }).populate('cities');
+        const user = await User.findOne({ token: req.body.token }).populate('cities');
         console.log({ "USER": user });
         if (!user) {
             res.json({ result: false, error: 'User not found' });
