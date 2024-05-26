@@ -62,24 +62,10 @@ router.get('/updateAll', async (req, res) => {
 // 	});
 // });
 
-// router.get('/userCities', async (req, res) => {
-// 	const { token } = req.query; // Extract token from query parameters
-// 	try {
-// 		// Authenticate user by token
-// 		const user = await User.findOne({ token }).populate('cities');
-// 		if (!user) {
-// 			return res.json({ result: false, error: 'User not found' });
-// 		}
 
-// 		res.json({ result: true, cities: user.cities });
-// 	} catch (error) {
-// 		console.error("Error fetching user cities:", error);
-// 		res.status(500).json({ result: false, error: 'Internal Server Error' });
-// 	}
-// });
 
+// Add city to user's list
 router.post('/addCity', async (req, res) => {
-
 	try {
 		// Authenticate user by token
 		console.log("Token received in request:", req.body.token);
