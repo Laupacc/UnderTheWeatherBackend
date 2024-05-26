@@ -65,8 +65,7 @@ router.get('/updateAll', async (req, res) => {
 router.get('/userCities', async (req, res) => {
 	try {
 		// Authenticate user by token
-		const token = req.query.token; // Assuming the token is passed in the query string
-		const user = await User.findOne({ token: token }).populate('cities');
+		const user = await User.findOne({ token: req.body.token }).populate('cities');
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
