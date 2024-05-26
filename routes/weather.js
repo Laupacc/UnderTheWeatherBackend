@@ -78,34 +78,37 @@ router.get('/user/:token', async (req, res) => {
 
 
 router.post('/addCity', async (req, res) => {
-	if (!checkBody(req.body, ['username', 'cityName'])) {
+	if (!checkBody(req.body, ['token',])) {
 		return res.json({ result: false, error: 'Missing or empty fields' });
 	}
 
 	try {
-		const user = await User.findOne({ username: req.body.username });
+		// Authenticate user by token
+		const user = await User.findOne({ token: req.body.token });
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
 		let apiData;
-		const cityName = req.body.cityName;
 
-		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
-		apiData = await response.json();
-
-		if (apiData.cod !== 200) {
-			return res.json({ result: false, error: apiData.message });
+		// Fetch weather data based on cityName or lat/lon
+		if (req.body.cityName) {
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
+			apiData = await response.json();
+		} else if (req.body.lat && req.body.lon) {
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`);
+			apiData = await response.json();
+		} else {
+			return res.json({ result: false, error: 'Missing cityName or lat/lon in request body' });
 		}
 
-		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(`^${apiData.name}$`, 'i') } });
+		// Check if city already exists in the database
+		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(apiData.name, 'i') } });
 		if (existingCity) {
-			user.cities.push(existingCity._id);
-			await user.save();
-			const populatedUser = await User.findOne({ _id: user._id }).populate('cities');
-			return res.json({ result: true, cities: populatedUser.cities });
+			return res.json({ result: false, error: 'City already exists in the database' });
 		}
 
+		// Create a new City document
 		const newCity = new City({
 			cityName: apiData.name,
 			country: apiData.sys.country,
@@ -128,13 +131,18 @@ router.post('/addCity', async (req, res) => {
 			timezone: apiData.timezone,
 		});
 
+		// Save the new city to the database
 		const savedCity = await newCity.save();
+
+		// Add the new city to user's cities
 		user.cities.push(savedCity._id);
 		await user.save();
 
+		// Return success response with the newly added city data
 		const populatedUser = await User.findOne({ _id: user._id }).populate('cities');
 		res.json({ result: true, cities: populatedUser.cities });
 	} catch (error) {
+		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
