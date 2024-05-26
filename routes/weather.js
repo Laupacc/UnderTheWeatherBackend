@@ -81,11 +81,8 @@ router.get('/userCities', async (req, res) => {
 router.post('/addCity', async (req, res) => {
 	try {
 		// Authenticate user by token
-		console.log("Token received in request:", req.body.token);
 		const user = await User.findOne({ token: req.body.token });
-		console.log("User found in database:", user);
 		if (!user) {
-			console.log("User not found in database");
 			return res.json({ result: false, error: 'User not found' });
 		}
 
@@ -103,50 +100,45 @@ router.post('/addCity', async (req, res) => {
 		}
 
 		// Check if city already exists in the database
-		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(apiData.name, 'i') } });
+		const existingCity = user.cities.find(city => city.cityName.toLowerCase() === apiData.name.toLowerCase());
 		if (existingCity) {
 			return res.json({ result: false, error: 'City already exists in the database' });
 		}
 
-		// Create a new City document
-		const newCity = new City({
-			cityName: apiData.name,
-			country: apiData.sys.country,
-			main: apiData.weather[0].main,
-			description: apiData.weather[0].description,
-			icon: apiData.weather[0].icon,
-			temp: apiData.main.temp,
-			feels_like: apiData.main.feels_like,
-			tempMin: apiData.main.temp_min,
-			tempMax: apiData.main.temp_max,
-			humidity: apiData.main.humidity,
-			wind: apiData.wind.speed,
-			clouds: apiData.clouds.all,
-			rain: apiData.rain ? apiData.rain['1h'] : 0,
-			snow: apiData.snow ? apiData.snow['1h'] : 0,
-			sunrise: apiData.sys.sunrise,
-			sunset: apiData.sys.sunset,
-			latitude: apiData.coord.lat,
-			longitude: apiData.coord.lon,
-			timezone: apiData.timezone,
-		});
+        // Create a new city object
+        const newCity = {
+            cityName: apiData.name,
+            country: apiData.sys.country,
+            main: apiData.weather[0].main,
+            description: apiData.weather[0].description,
+            icon: apiData.weather[0].icon,
+            temp: apiData.main.temp,
+            feels_like: apiData.main.feels_like,
+            tempMin: apiData.main.temp_min,
+            tempMax: apiData.main.temp_max,
+            humidity: apiData.main.humidity,
+            wind: apiData.wind.speed,
+            clouds: apiData.clouds.all,
+            rain: apiData.rain ? apiData.rain['1h'] : 0,
+            snow: apiData.snow ? apiData.snow['1h'] : 0,
+            sunrise: apiData.sys.sunrise,
+            sunset: apiData.sys.sunset,
+            latitude: apiData.coord.lat,
+            longitude: apiData.coord.lon,
+            timezone: apiData.timezone,
+        };
 
-		// Save the new city to the database
-		const savedCity = await newCity.save();
+        // Add the new city to user's cities
+        user.cities.push(newCity);
+        await user.save();
 
-		// Add the new city to user's cities
-		user.cities.push(savedCity._id);
-		await user.save();
-
-		// Return success response with the newly added city data
-		const populatedUser = await User.findOne({ _id: user._id }).populate('cities');
-		res.json({ result: true, cities: populatedUser.cities });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ result: false, error: 'Internal Server Error' });
-	}
+        // Return success response with the user's cities
+        res.json({ result: true, cities: user.cities });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, error: 'Internal Server Error' });
+    }
 });
-
 // get city forecast
 router.get('/forecast/:cityName', async (req, res) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`);
