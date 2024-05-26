@@ -64,9 +64,6 @@ router.get('/', (req, res) => {
 
 
 router.post('/addCity', async (req, res) => {
-	if (!checkBody(req.body, ['token',])) {
-		return res.json({ result: false, error: 'Missing or empty fields' });
-	}
 
 	try {
 		// Authenticate user by token
