@@ -20,7 +20,7 @@ const citySchema = mongoose.Schema({
 	latitude: Number,
 	longitude: Number,
 	timezone: Number,
-});
+}, { _id: false });
 
 const City = mongoose.model('cities', citySchema);
 

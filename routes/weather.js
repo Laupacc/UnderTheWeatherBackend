@@ -136,6 +136,7 @@ router.post('/addCity', async (req, res) => {
         res.json({ result: true, cities: user.cities });
     } catch (error) {
         console.error(error);
+		console.error('Error:', error.message);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
     }
 });
