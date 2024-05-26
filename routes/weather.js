@@ -63,54 +63,49 @@ router.get('/updateAll', async (req, res) => {
 // });
 
 // Get all cities from user database
-router.get('/user/:token', (req, res) => {
-	User.findOne({ token: req.params.token }).populate('cities').then(user => {
-		if (user === null) {
+router.get('/user/:token', async (req, res) => {
+	try {
+		const user = await User.findOne({ token: req.params.token }).populate('cities');
+		if (!user) {
 			res.json({ result: false, error: 'User not found' });
 			return;
 		}
 		res.json({ result: true, cities: user.cities });
-	});
+	} catch (error) {
+		res.status(500).json({ result: false, error: error.message });
+	}
 });
 
 
-
 router.post('/addCity', async (req, res) => {
-	if (!checkBody(req.body, ['username',])) {
+	if (!checkBody(req.body, ['username', 'cityName'])) {
 		return res.json({ result: false, error: 'Missing or empty fields' });
 	}
 
 	try {
-		// Authenticate user by token
-		const user = await User.findOne({ token: req.params.token });
+		const user = await User.findOne({ username: req.body.username });
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
 		let apiData;
+		const cityName = req.body.cityName;
 
-		// Fetch weather data based on cityName or lat/lon
-		if (req.body.cityName) {
-			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
-			apiData = await response.json();
-		} else if (req.body.lat && req.body.lon) {
-			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`);
-			apiData = await response.json();
-		} else {
-			return res.json({ result: false, error: 'Missing cityName or lat/lon in request body' });
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
+		apiData = await response.json();
+
+		if (apiData.cod !== 200) {
+			return res.json({ result: false, error: apiData.message });
 		}
 
-		// Check if city already exists in the database
-		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(apiData.name, 'i') } });
+		const existingCity = await City.findOne({ cityName: { $regex: new RegExp(`^${apiData.name}$`, 'i') } });
 		if (existingCity) {
-			// Create a new City document
 			user.cities.push(existingCity._id);
 			await user.save();
 			const populatedUser = await User.findOne({ _id: user._id }).populate('cities');
 			return res.json({ result: true, cities: populatedUser.cities });
 		}
 
-		// Create a new City document
 		const newCity = new City({
 			cityName: apiData.name,
 			country: apiData.sys.country,
@@ -133,18 +128,13 @@ router.post('/addCity', async (req, res) => {
 			timezone: apiData.timezone,
 		});
 
-		// Save the new city to the database
 		const savedCity = await newCity.save();
-
-		// Add the new city to user's cities
 		user.cities.push(savedCity._id);
 		await user.save();
 
-		// Return success response with the newly added city data
 		const populatedUser = await User.findOne({ _id: user._id }).populate('cities');
 		res.json({ result: true, cities: populatedUser.cities });
 	} catch (error) {
-		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
