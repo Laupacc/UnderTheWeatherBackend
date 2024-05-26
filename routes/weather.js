@@ -56,34 +56,27 @@ router.get('/updateAll', async (req, res) => {
 });
 
 // Get all cities from database
-router.get('/', (req, res) => {
-	City.find().then(data => {
-		res.json({ weather: data });
-	});
-});
+// router.get('/', (req, res) => {
+// 	City.find().then(data => {
+// 		res.json({ weather: data });
+// 	});
+// });
 
-router.get('/userCities/:userId', async (req, res) => {
+router.get('/userCities', async (req, res) => {
 	try {
-		// Find the user by their ID
-		const user = await User.findById(req.params.userId);
-
+		// Authenticate user by token
+		const token = req.query.token; // Assuming the token is passed in the query string
+		const user = await User.findOne({ token: token }).populate('cities');
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
-		// Retrieve the array of city IDs associated with the user
-		const cityIds = user.cities;
-
-		// Query the City collection to get details of each city
-		const cities = await City.find({ _id: { $in: cityIds } });
-
-		res.json({ result: true, cities: cities });
+		res.json({ result: true, cities: user.cities });
 	} catch (error) {
-		console.error(error);
+		console.error("Error fetching user cities:", error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
-
 
 router.post('/addCity', async (req, res) => {
 
