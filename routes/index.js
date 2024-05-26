@@ -39,6 +39,36 @@ router.get('/cityautocomplete', async (req, res) => {
 });
 
 
+// Delete city from user's list
+router.delete('/deleteCity', async (req, res) => {
+    try {
+        // Authenticate user by token
+        const user = await User.findOne
+            ({
+                token
+                    : req.body.token
+            }).populate('cities');
+        if (!user) {
+            return res.json({ result: false, error: 'User not found' });
+        }
+
+        // Find city by name in user's cities
+        const cityIndex = user.cities.findIndex(city => city.cityName.toLowerCase() === req.body.cityName.toLowerCase());
+        if (cityIndex === -1) {
+            return res.json({ result: false, error: 'City not found in user\'s list' });
+        }
+
+        // Remove city from user's cities
+        user.cities.splice(cityIndex, 1);
+        await user.save();
+
+        // Return success response with the user's cities
+        res.json({ result: true, cities: user.cities });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, error: 'Internal Server Error' });
+    }
+});
 
 
 
