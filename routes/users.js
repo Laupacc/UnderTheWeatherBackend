@@ -55,21 +55,4 @@ router.post('/signin', (req, res) => {
     });
 });
 
-
-// Get user's cities
-router.get('/userCities', async (req, res) => {
-    try {
-        const user = await User.findOne({ token: req.query.token }).populate('cities');
-        if (!user) {
-            return res.json({ result: false, error: 'User not found' });
-        }
-
-        res.json({ result: true, cities: user.cities });
-    } catch (error) {
-        console.error("Error fetching user cities:", error.message);
-        console.error("Stack trace:", error.stack);
-        res.status(500).json({ result: false, error: 'Internal Server Error' });
-    }
-});
-
 module.exports = router;
