@@ -55,19 +55,5 @@ router.post('/signin', (req, res) => {
     });
 });
 
-// Get all cities from user database
-router.get('/token', async (req, res) => {
-    try {
-        const user = await User.findOne({ token: req.body.token }).populate('cities');
-        console.log({ "USER": user });
-        if (!user) {
-            res.json({ result: false, error: 'User not found again' });
-            return;
-        }
-        res.json({ result: true, cities: user.cities });
-    } catch (error) {
-        res.status(500).json({ result: false, error: error.message });
-    }
-});
 
 module.exports = router;

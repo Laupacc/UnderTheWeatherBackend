@@ -62,6 +62,28 @@ router.get('/', (req, res) => {
 	});
 });
 
+router.get('/userCities/:userId', async (req, res) => {
+	try {
+		// Find the user by their ID
+		const user = await User.findById(req.params.userId);
+
+		if (!user) {
+			return res.json({ result: false, error: 'User not found' });
+		}
+
+		// Retrieve the array of city IDs associated with the user
+		const cityIds = user.cities;
+
+		// Query the City collection to get details of each city
+		const cities = await City.find({ _id: { $in: cityIds } });
+
+		res.json({ result: true, cities: cities });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
+});
+
 
 router.post('/addCity', async (req, res) => {
 
