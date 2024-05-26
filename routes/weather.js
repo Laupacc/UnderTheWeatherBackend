@@ -82,7 +82,7 @@ router.post('/addCity', async (req, res) => {
 
 	try {
 		// Authenticate user by token
-		const user = await User.findOne({ username: req.body.username });
+		const user = await User.findOne({ token: req.params.token });
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
