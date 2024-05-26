@@ -105,40 +105,40 @@ router.post('/addCity', async (req, res) => {
 			return res.json({ result: false, error: 'City already exists in the database' });
 		}
 
-        // Create a new city object
-        const newCity = {
-            cityName: apiData.name,
-            country: apiData.sys.country,
-            main: apiData.weather[0].main,
-            description: apiData.weather[0].description,
-            icon: apiData.weather[0].icon,
-            temp: apiData.main.temp,
-            feels_like: apiData.main.feels_like,
-            tempMin: apiData.main.temp_min,
-            tempMax: apiData.main.temp_max,
-            humidity: apiData.main.humidity,
-            wind: apiData.wind.speed,
-            clouds: apiData.clouds.all,
-            rain: apiData.rain ? apiData.rain['1h'] : 0,
-            snow: apiData.snow ? apiData.snow['1h'] : 0,
-            sunrise: apiData.sys.sunrise,
-            sunset: apiData.sys.sunset,
-            latitude: apiData.coord.lat,
-            longitude: apiData.coord.lon,
-            timezone: apiData.timezone,
-        };
+		// Create a new city object
+		const newCity = {
+			cityName: apiData.name,
+			country: apiData.sys.country,
+			main: apiData.weather[0].main,
+			description: apiData.weather[0].description,
+			icon: apiData.weather[0].icon,
+			temp: apiData.main.temp,
+			feels_like: apiData.main.feels_like,
+			tempMin: apiData.main.temp_min,
+			tempMax: apiData.main.temp_max,
+			humidity: apiData.main.humidity,
+			wind: apiData.wind.speed,
+			clouds: apiData.clouds.all,
+			rain: apiData.rain ? apiData.rain['1h'] : 0,
+			snow: apiData.snow ? apiData.snow['1h'] : 0,
+			sunrise: apiData.sys.sunrise,
+			sunset: apiData.sys.sunset,
+			latitude: apiData.coord.lat,
+			longitude: apiData.coord.lon,
+			timezone: apiData.timezone,
+		};
 
-        // Add the new city to user's cities
-        user.cities.push(newCity);
-        await user.save();
+		// Add the new city to user's cities
+		user.cities.push(newCity);
+		await user.save();
 
-        // Return success response with the user's cities
-        res.json({ result: true, cities: user.cities });
-    } catch (error) {
-        console.error(error);
+		// Return success response with the user's cities
+		res.json({ result: true, cities: user.cities });
+	} catch (error) {
+		console.error(error);
 		console.error('Error:', error.message);
-        res.status(500).json({ result: false, error: 'Internal Server Error' });
-    }
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 // get city forecast
 router.get('/forecast/:cityName', async (req, res) => {
@@ -179,6 +179,37 @@ router.delete("/:cityName", (req, res) => {
 			res.json({ result: false, error: "City not found" });
 		}
 	});
+});
+
+// Delete city from user's list
+router.delete('/deleteCity', async (req, res) => {
+	try {
+		// Authenticate user by token
+		const user = await User.findOne
+			({
+				token
+					: req.body.token
+			}).populate('cities');
+		if (!user) {
+			return res.json({ result: false, error: 'User not found' });
+		}
+
+		// Find city by name in user's cities
+		const cityIndex = user.cities.findIndex(city => city.cityName.toLowerCase() === req.body.cityName.toLowerCase());
+		if (cityIndex === -1) {
+			return res.json({ result: false, error: 'City not found in user\'s list' });
+		}
+
+		// Remove city from user's cities
+		user.cities.splice(cityIndex, 1);
+		await user.save();
+
+		// Return success response with the user's cities
+		res.json({ result: true, cities: user.cities });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 
 
