@@ -65,7 +65,7 @@ router.get('/', (req, res) => {
 // Get all cities from user database
 router.get('/user/:token', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.params.token }).populate('cities');
+		const user = await User.findOne({ token: req.params.token });
 		if (!user) {
 			res.json({ result: false, error: 'User not found' });
 			return;
