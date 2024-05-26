@@ -61,7 +61,7 @@ router.get('/token', async (req, res) => {
         const user = await User.findOne({ token: req.body.token }).populate('cities');
         console.log({ "USER": user });
         if (!user) {
-            res.json({ result: false, error: 'User not found' });
+            res.json({ result: false, error: 'User not found again' });
             return;
         }
         res.json({ result: true, cities: user.cities });
