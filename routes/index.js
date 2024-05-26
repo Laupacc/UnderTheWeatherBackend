@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 
 const fetch = require('node-fetch');
+const City = require('../models/cities');
+const User = require('../models/users');
+
 
 // Get all cities from API for autocomplete feature in frontend header
 router.get('/cityautocomplete', async (req, res) => {
