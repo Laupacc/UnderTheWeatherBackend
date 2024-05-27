@@ -89,8 +89,10 @@ const updateCityWeatherForUser = async (cityName, user) => {
 //update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
 	try {
+		console.log('Token:', req.query.token); 
 		const user = await User.findOne({ token: req.query.token }).populate('cities');
 		if (!user) {
+			console.log('User not found for token:', req.query.token); 
 			return res.json({ result: false, error: 'User not found' });
 		}
 		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName));
