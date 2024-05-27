@@ -57,49 +57,51 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 // });
 
 
-// // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, user) => {
+// Update weather data for a specific city in user's list
+const updateCityWeatherForUser = async (cityName, cities) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
+
 	if (apiData.cod === 200) {
-		// Update city document with new data
-		const city = user.cities.find(city => city.cityName === cityName);
-		city.main = apiData.weather[0].main;
-		city.country = apiData.sys.country;
-		city.description = apiData.weather[0].description;
-		city.icon = apiData.weather[0].icon;
-		city.temp = apiData.main.temp;
-		city.feels_like = apiData.main.feels_like;
-		city.tempMin = apiData.main.temp_min;
-		city.tempMax = apiData.main.temp_max;
-		city.humidity = apiData.main.humidity;
-		city.wind = apiData.wind.speed;
-		city.clouds = apiData.clouds.all;
-		city.rain = apiData.rain ? apiData.rain['1h'] : 0;
-		city.snow = apiData.snow ? apiData.snow['1h'] : 0;
-		city.sunrise = apiData.sys.sunrise;
-		city.sunset = apiData.sys.sunset;
-		city.latitude = apiData.coord.lat;
-		city.longitude = apiData.coord.lon;
-		city.timezone = apiData.timezone;
-		await user.save();
+		const city = cities.find(city => city.cityName === cityName);
+
+		if (city) {
+			city.main = apiData.weather[0].main;
+			city.country = apiData.sys.country;
+			city.description = apiData.weather[0].description;
+			city.icon = apiData.weather[0].icon;
+			city.temp = apiData.main.temp;
+			city.feels_like = apiData.main.feels_like;
+			city.tempMin = apiData.main.temp_min;
+			city.tempMax = apiData.main.temp_max;
+			city.humidity = apiData.main.humidity;
+			city.wind = apiData.wind.speed;
+			city.clouds = apiData.clouds.all;
+			city.rain = apiData.rain ? apiData.rain['1h'] : 0;
+			city.snow = apiData.snow ? apiData.snow['1h'] : 0;
+			city.sunrise = apiData.sys.sunrise;
+			city.sunset = apiData.sys.sunset;
+			city.latitude = apiData.coord.lat;
+			city.longitude = apiData.coord.lon;
+			city.timezone = apiData.timezone;
+		}
 	}
 };
 
-//update weather data for cities in user's list
+// Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
 	try {
 		const user = await User.findOne({ token: req.query.token }).populate('cities');
+
 		if (!user) {
-			console.log('User not found for token:', req.query.token); 
+			console.log('User not found for token:', req.query.token);
 			return res.json({ result: false, error: 'User not found' });
 		}
-		console.log('User cities before update:', user.cities);
 
-
-		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName));
+		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
 		await Promise.all(updatePromises);
-		console.log('Updating city:', user.cities);
+
+		await user.save();
 
 		res.json({ result: true, message: 'All cities updated successfully' });
 	} catch (error) {
@@ -107,6 +109,7 @@ router.get('/updateUserCities', async (req, res) => {
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
+
 
 
 // Get user's cities
