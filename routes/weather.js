@@ -100,7 +100,8 @@ router.post('/addCity', async (req, res) => {
 		}
 
 		// Check if city already exists in the database
-		const existingCity = user.cities.find(city => city.cityName.toLowerCase() === apiData.name.toLowerCase());
+		const existingCity = user.cities.find(city => city.cityName.toLowerCase() === apiData.name.toLowerCase()
+			&& city.country.toLowerCase() === apiData.sys.country.toLowerCase());
 		if (existingCity) {
 			return res.json({ result: false, error: 'City already exists in the database' });
 		}
@@ -140,6 +141,7 @@ router.post('/addCity', async (req, res) => {
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
 	}
 });
+
 // get city forecast
 router.get('/forecast/:cityName', async (req, res) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${req.params.cityName}&appid=${OWM_API_KEY}&units=metric`);
