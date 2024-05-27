@@ -18,25 +18,27 @@ router.post('/signup', (req, res) => {
 
     // Check if the user has not already been registered
     User.findOne({ username: req.body.username }).then(data => {
-        if (data === null) {
-            const hash = bcrypt.hashSync(req.body.password, 10);
-
-            const newUser = new User({
-                username: req.body.username,
-                password: hash,
-                token: uid2(32),
-                cities: [],
-            });
-
-            newUser.save().then(newDoc => {
-                res.json({ result: true, token: newDoc.token });
-            });
-        } else {
+        if (data !== null) {
             // User already exists in database
-            res.json({ result: false, error: 'User already exists' });
+            res.json({ result: false, error: 'Username already exists, please choose another one' });
+            return;
         }
+
+        const hash = bcrypt.hashSync(req.body.password, 10);
+
+        const newUser = new User({
+            username: req.body.username,
+            password: hash,
+            token: uid2(32),
+            cities: [],
+        });
+
+        newUser.save().then(newDoc => {
+            res.json({ result: true, token: newDoc.token });
+        });
     });
 });
+
 
 // Sign in an existing user
 router.post('/signin', (req, res) => {
