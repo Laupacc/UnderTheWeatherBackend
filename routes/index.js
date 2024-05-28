@@ -22,7 +22,7 @@ router.get('/cityautocomplete', async (req, res) => {
             const countryCities = country.cities;
 
             const countryCitiesMapped = countryCities.map((city) => {
-                return { name: city, iso2: countryCode };
+                return { cityName: city, country: countryCode };
             });
 
             cities = [...cities, ...countryCitiesMapped];
