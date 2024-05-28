@@ -139,8 +139,8 @@ router.post('/addCity', async (req, res) => {
 		let apiData;
 
 		// Fetch weather data based on cityName or lat/lon
-		if (req.body.cityName && req.body.countryCode) {
-			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName},${req.body.countryCode}&appid=${OWM_API_KEY}&units=metric`);
+		if (req.body.cityName) {
+			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName}&appid=${OWM_API_KEY}&units=metric`);
 			apiData = await response.json();
 		} else if (req.body.lat && req.body.lon) {
 			const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${req.body.lat}&lon=${req.body.lon}&appid=${OWM_API_KEY}&units=metric`);
