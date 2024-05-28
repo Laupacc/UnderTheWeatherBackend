@@ -22,14 +22,14 @@ router.get('/cityautocomplete', async (req, res) => {
             const countryCities = country.cities;
 
             const countryCitiesMapped = countryCities.map((city) => {
-                return { cityName: city, country: countryCode };
+                return { name: city, iso2: countryCode };
             });
 
             cities = [...cities, ...countryCitiesMapped];
         });
 
         // Sort cities alphabetically
-        cities.sort((a, b) => a.cityName.localeCompare(b.cityName));
+        cities.sort((a, b) => a.name.localeCompare(b.name));
 
         res.json({ result: true, cities: cities });
     } catch (error) {
