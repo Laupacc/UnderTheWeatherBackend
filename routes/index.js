@@ -29,7 +29,7 @@ router.get('/cityautocomplete', async (req, res) => {
         });
 
         // Sort cities alphabetically
-        cities.sort((a, b) => a.name.localeCompare(b.name));
+        cities.sort((a, b) => a.cityName.localeCompare(b.cityName));
 
         res.json({ result: true, cities: cities });
     } catch (error) {
