@@ -152,6 +152,11 @@ router.post('/addCity', async (req, res) => {
 		// Check if city already exists in the database
 		const existingCity = user.cities.find(city => city.cityName.toLowerCase() === apiData.name.toLowerCase()
 			&& city.country.toLowerCase() === apiData.sys.country.toLowerCase());
+
+		console.log("Existing City:", existingCity);
+		console.log("API City Name:", apiData.name);
+		console.log("API Country Code:", apiData.sys.country);
+
 		if (existingCity) {
 			return res.json({ result: false, error: 'City already exists in the database' });
 		}
