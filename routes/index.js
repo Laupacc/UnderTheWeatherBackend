@@ -18,11 +18,11 @@ router.get('/cityautocomplete', async (req, res) => {
 
         let cities = [];
         apiData.data.forEach((country) => {
-            const countryCode = country.iso3;
+            const countryCode = country.iso2;
             const countryCities = country.cities;
 
             const countryCitiesMapped = countryCities.map((city) => {
-                return { name: city, iso3: countryCode };
+                return { name: city, iso2: countryCode };
             });
 
             cities = [...cities, ...countryCitiesMapped];
