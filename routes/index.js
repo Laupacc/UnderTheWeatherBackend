@@ -53,7 +53,7 @@ router.delete('/deleteCity', async (req, res) => {
         }
 
         // Find city by name in user's cities
-        const cityIndex = user.cities.findIndex(city => city.cityName.toLowerCase() === req.body.cityName.toLowerCase() && city.country === req.body.country);
+        const cityIndex = user.cities.findIndex(city => city.cityName.toLowerCase() === req.body.cityName.toLowerCase() && city.country.toLowerCase() === req.body.country.toLowerCase());
         if (cityIndex === -1) {
             return res.json({ result: false, error: 'City not found in user\'s list' });
         }
