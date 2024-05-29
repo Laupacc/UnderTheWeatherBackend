@@ -63,7 +63,7 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 	const apiData = await response.json();
 
 	if (apiData.cod === 200) {
-		const city = cities.find(city => city.cityName.toLowerCase() === cityName.toLowerCase() && city.country.toLowerCase() === country.toLowerCase());
+		const city = cities.find(city => city.cityName === cityName && city.country === country);
 
 		if (city) {
 			city.main = apiData.weather[0].main;
