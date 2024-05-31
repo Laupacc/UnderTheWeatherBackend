@@ -55,12 +55,13 @@ router.delete('/deleteCity', async (req, res) => {
             return res.json({ result: false, error: 'City not found in user\'s list' });
         }
 
+        const city = user.cities[cityIndex];
         // Remove city from user's cities
         user.cities.splice(cityIndex, 1);
         await user.save();
 
         // Return success response with the user's cities
-        res.json({ result: true, cities: user.cities, country: user.country });
+        res.json({ result: true, cities: user.cities, cityName: city.cityName, countryName: city.countryName });
     } catch (error) {
         console.error(error);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
