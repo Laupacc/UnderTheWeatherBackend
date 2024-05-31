@@ -127,6 +127,21 @@ router.get('/userCities', async (req, res) => {
 	}
 });
 
+// Get all cities
+router.get('/', (req, res) => {
+	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName},${req.body.country}&appid=${OWM_API_KEY}&units=metric`)
+		.then(response => response.json())
+		.then(data => {
+			res.json({ result: true, weather: data });
+		})
+		.catch(error => {
+			console.error('Error:', error);
+			res.json({ result: false, error: 'Internal Server Error' });
+		});
+});
+
+
+
 // Add city to user's list
 router.post('/addCity', async (req, res) => {
 	try {
