@@ -44,10 +44,7 @@ router.delete('/deleteCity', async (req, res) => {
     try {
         // Authenticate user by token
         const user = await User.findOne
-            ({
-                token
-                    : req.body.token
-            }).populate('cities');
+            ({ token: req.body.token }).populate('cities');
         if (!user) {
             return res.json({ result: false, error: 'User not found' });
         }
@@ -63,7 +60,7 @@ router.delete('/deleteCity', async (req, res) => {
         await user.save();
 
         // Return success response with the user's cities
-        res.json({ result: true, cities: user.cities });
+        res.json({ result: true, cities: user.cities, country: user.country });
     } catch (error) {
         console.error(error);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
