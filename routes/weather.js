@@ -129,17 +129,23 @@ router.get('/userCities', async (req, res) => {
 
 // Get all cities
 router.get('/getLocal', (req, res) => {
-	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName},${req.body.country}&appid=${OWM_API_KEY}&units=metric`)
+	const cityName = req.query.cityName;
+	const country = req.query.country;
+
+	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`)
 		.then(response => response.json())
 		.then(data => {
-			res.json({ result: true, weather: data });
+			if (data.cod === 200) {
+				res.json({ result: true, weather: data });
+			} else {
+				res.json({ result: false, error: data.message });
+			}
 		})
 		.catch(error => {
 			console.error('Error:', error);
 			res.json({ result: false, error: 'Internal Server Error' });
 		});
 });
-
 
 
 // Add city to user's list
