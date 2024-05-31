@@ -61,7 +61,7 @@ router.delete('/deleteCity', async (req, res) => {
         await user.save();
 
         // Return success response with the user's cities
-        res.json({ result: true, cities: user.cities, cityName: city.cityName, countryName: city.countryName });
+        res.json({ result: true, cities: user.cities, cityName: city.cityName, country: city.country });
     } catch (error) {
         console.error(error);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
