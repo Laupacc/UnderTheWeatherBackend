@@ -55,6 +55,7 @@ router.delete('/deleteCity', async (req, res) => {
             return res.json({ result: false, error: 'City not found in user\'s list' });
         }
 
+        // Get city object
         const city = user.cities[cityIndex];
         // Remove city from user's cities
         user.cities.splice(cityIndex, 1);

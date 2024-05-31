@@ -127,24 +127,32 @@ router.get('/userCities', async (req, res) => {
 	}
 });
 
-// Get all cities
-router.get('/getLocal', (req, res) => {
+// Get all cities for local storage
+router.get('/getLocal', async (req, res) => {
 	const cityName = req.query.cityName;
 	const country = req.query.country;
+	const lat = req.query.lat;
+	const lon = req.query.lon;
 
-	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`)
-		.then(response => response.json())
-		.then(data => {
-			if (data.cod === 200) {
-				res.json({ result: true, weather: data });
-			} else {
-				res.json({ result: false, error: data.message });
-			}
-		})
-		.catch(error => {
-			console.error('Error:', error);
-			res.json({ result: false, error: 'Internal Server Error' });
-		});
+	if (cityName && country) {
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`)
+		const data = await response.json();
+		if (data.cod === 200) {
+			res.json({ result: true, weather: data });
+		} else {
+			res.json({ result: false, error: data.message });
+		}
+	} else if (lat && lon) {
+		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric`)
+		const data = await response.json();
+		if (data.cod === 200) {
+			res.json({ result: true, weather: data });
+		} else {
+			res.json({ result: false, error: data.message });
+		}
+	} else {
+		res.json({ result: false, error: 'Missing cityName or lat/lon in request query' });
+	}
 });
 
 
