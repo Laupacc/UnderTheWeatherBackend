@@ -128,7 +128,7 @@ router.get('/userCities', async (req, res) => {
 });
 
 // Get all cities
-router.get('/', (req, res) => {
+router.get('/getLocal', (req, res) => {
 	fetch(`https://api.openweathermap.org/data/2.5/weather?q=${req.body.cityName},${req.body.country}&appid=${OWM_API_KEY}&units=metric`)
 		.then(response => response.json())
 		.then(data => {
