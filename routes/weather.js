@@ -95,26 +95,30 @@ const updateCityWeatherForUser = async (cityName, country, user) => {
 
 // Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
-	try {
-		const user = await User.findOne({ token: req.query.token });
+    try {
+        const user = await User.findOne({ token: req.query.token });
 
-		if (!user) {
-			console.log('User not found for token:', req.query.token);
-			return res.json({ result: false, error: 'User not found' });
-		}
+        if (!user) {
+            console.log('User not found for token:', req.query.token);
+            return res.json({ result: false, error: 'User not found' });
+        }
 
-		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user));
-		await Promise.all(updatePromises);
+        if (user.cities && user.cities.length > 0) {
+            const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user));
+            await Promise.all(updatePromises);
 
-		// Save the user after all updates
-		await user.save();
+            // Save the user after all updates
+            await user.save();
 
-		// Return the updated cities
-		res.json({ result: true, message: 'All cities updated successfully', cities: user.cities });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ result: false, error: 'Internal Server Error' });
-	}
+            // Return the updated cities
+            res.json({ result: true, message: 'All cities updated successfully', cities: user.cities });
+        } else {
+            res.json({ result: false, error: 'No cities to update' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ result: false, error: 'Internal Server Error' });
+    }
 });
 
 
