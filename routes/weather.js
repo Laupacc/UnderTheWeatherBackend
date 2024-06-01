@@ -58,12 +58,12 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
 // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, user) => {
+const updateCityWeatherForUser = async (cityName, country, user) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
 	if (apiData.cod === 200 && apiData.weather && apiData.main && apiData.sys && apiData.coord) {
-		const city = user.cities.find(city => city.cityName === cityName);
+		const city = user.cities.find(city => city.cityName === cityName && city.country === country);
 
 		if (city) {
 			city.main = apiData.weather[0].main;
@@ -84,6 +84,8 @@ const updateCityWeatherForUser = async (cityName, user) => {
 			city.latitude = apiData.coord.lat;
 			city.longitude = apiData.coord.lon;
 			city.timezone = apiData.timezone;
+
+			user.markModified('cities');
 		}
 	}
 	else {
@@ -94,7 +96,7 @@ const updateCityWeatherForUser = async (cityName, user) => {
 // Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.query.token }).populate('cities');
+		const user = await User.findOne({ token: req.query.token });
 
 		if (!user) {
 			console.log('User not found for token:', req.query.token);
@@ -104,9 +106,11 @@ router.get('/updateUserCities', async (req, res) => {
 		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user));
 		await Promise.all(updatePromises);
 
+		// Save the user after all updates
 		await user.save();
 
-		res.json({ result: true, message: 'All cities updated successfully' });
+		// Return the updated cities
+		res.json({ result: true, message: 'All cities updated successfully', cities: user.cities });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
@@ -118,7 +122,7 @@ router.get('/updateUserCities', async (req, res) => {
 // Get user's cities
 router.get('/userCities', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.query.token }).populate('cities');
+		const user = await User.findOne({ token: req.query.token });
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
