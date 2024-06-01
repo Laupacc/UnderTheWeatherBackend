@@ -64,32 +64,37 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 
 	if (apiData.cod === 200) {
 		// Find the city in the user's list
-		await User.cities.findOneAndUpdate(
-			{ cityName: cityName },
+await User.findOneAndUpdate(
+			{ cities: { $elemMatch: { cityName: cityName } } },
+
 			{
-				main: apiData.weather[0].main,
-				country: apiData.sys.country,
-				description: apiData.weather[0].description,
-				icon: apiData.weather[0].icon,
-				temp: apiData.main.temp,
-				feels_like: apiData.main.feels_like,
-				tempMin: apiData.main.temp_min,
-				tempMax: apiData.main.temp_max,
-				humidity: apiData.main.humidity,
-				wind: apiData.wind.speed,
-				clouds: apiData.clouds.all,
-				rain: apiData.rain ? apiData.rain['1h'] : 0,
-				snow: apiData.snow ? apiData.snow['1h'] : 0,
-				sunrise: apiData.sys.sunrise,
-				sunset: apiData.sys.sunset,
-				latitude: apiData.coord.lat,
-				longitude: apiData.coord.lon,
-				timezone: apiData.timezone,
+				$set: {
+					"cities.$.main": apiData.weather[0].main,
+					"cities.$.country": apiData.sys.country,
+					"cities.$.description": apiData.weather[0].description,
+					"cities.$.icon": apiData.weather[0].icon,
+					"cities.$.temp": apiData.main.temp,
+					"cities.$.feels_like": apiData.main.feels_like,
+					"cities.$.tempMin": apiData.main.temp_min,
+					"cities.$.tempMax": apiData.main.temp_max,
+					"cities.$.humidity": apiData.main.humidity,
+					"cities.$.wind": apiData.wind.speed,
+					"cities.$.clouds": apiData.clouds.all,
+					"cities.$.rain": apiData.rain ? apiData.rain['1h'] : 0,
+					"cities.$.snow": apiData.snow ? apiData.snow['1h'] : 0,
+					"cities.$.sunrise": apiData.sys.sunrise,
+					"cities.$.sunset": apiData.sys.sunset,
+					"cities.$.latitude": apiData.coord.lat,
+					"cities.$.longitude": apiData.coord.lon,
+					"cities.$.timezone": apiData.timezone,
+				}
 			},
 			{ new: true } // Return the updated document
 		);
 	}
 };
+
+
 
 
 
