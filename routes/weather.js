@@ -7,55 +7,6 @@ const User = require('../models/users');
 
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
-
-// Update weather data for a specific city
-// const updateCityWeather = async (cityName) => {
-// 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
-// 	const apiData = await response.json();
-// 	if (apiData.cod === 200) {
-// 		// Update city document with new data
-// 		await City.findOneAndUpdate(
-// 			{ cityName: cityName },
-// 			{
-// 				main: apiData.weather[0].main,
-// 				country: apiData.sys.country,
-// 				description: apiData.weather[0].description,
-// 				icon: apiData.weather[0].icon,
-// 				temp: apiData.main.temp,
-// 				feels_like: apiData.main.feels_like,
-// 				tempMin: apiData.main.temp_min,
-// 				tempMax: apiData.main.temp_max,
-// 				humidity: apiData.main.humidity,
-// 				wind: apiData.wind.speed,
-// 				clouds: apiData.clouds.all,
-// 				rain: apiData.rain ? apiData.rain['1h'] : 0,
-// 				snow: apiData.snow ? apiData.snow['1h'] : 0,
-// 				sunrise: apiData.sys.sunrise,
-// 				sunset: apiData.sys.sunset,
-// 				latitude: apiData.coord.lat,
-// 				longitude: apiData.coord.lon,
-// 				timezone: apiData.timezone,
-// 			},
-// 			{ new: true } // Return the updated document
-// 		);
-// 	}
-// };
-
-
-// Update all saved cities
-// router.get('/updateAll', async (req, res) => {
-// 	try {
-// 		const cities = await City.find({});
-// 		const updatePromises = cities.map(city => updateCityWeather(city.cityName));
-// 		await Promise.all(updatePromises);
-// 		console.log("All cities updated successfully");
-// 		res.json({ result: true, message: 'All cities updated successfully' });
-// 	} catch (error) {
-// 		console.error("Error updating cities:", error);
-// 		res.json({ result: false, error: error.message });
-// 	}
-// });
-
 // Get user's cities
 router.get('/userCities', async (req, res) => {
 	try {
@@ -108,7 +59,6 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 	}
 };
 
-
 // Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
 	try {
@@ -133,7 +83,7 @@ router.get('/updateUserCities', async (req, res) => {
 
 
 // Get all cities for local storage
-router.get('/getLocal', async (req, res) => {
+router.get('/localStorageCities', async (req, res) => {
 	const cityName = req.query.cityName;
 	const country = req.query.country;
 	const lat = req.query.lat;
@@ -161,58 +111,7 @@ router.get('/getLocal', async (req, res) => {
 });
 
 
-// Update weather data for a specific city in the local storage
-const updateCityWeatherForLocal = async (cityName, country) => {
-	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`);
-	const apiData = await response.json();
-
-	if (apiData.cod === 200) {
-		// Find the city in the local storage
-		await City.findOneAndUpdate(
-			{ cityName: cityName, country: country },
-
-			{
-				main: apiData.weather[0].main,
-				country: apiData.sys.country,
-				description: apiData.weather[0].description,
-				icon: apiData.weather[0].icon,
-				temp: apiData.main.temp,
-				feels_like: apiData.main.feels_like,
-				tempMin: apiData.main.temp_min,
-				tempMax: apiData.main.temp_max,
-				humidity: apiData.main.humidity,
-				wind: apiData.wind.speed,
-				clouds: apiData.clouds.all,
-				rain: apiData.rain ? apiData.rain['1h'] : 0,
-				snow: apiData.snow ? apiData.snow['1h'] : 0,
-				sunrise: apiData.sys.sunrise,
-				sunset: apiData.sys.sunset,
-				latitude: apiData.coord.lat,
-				longitude: apiData.coord.lon,
-				timezone: apiData.timezone,
-			},
-			{ new: true } // Return the updated document
-		);
-	}
-};
-
-// Update weather data for cities in local storage
-router.get('/updateLocalCities', async (req, res) => {
-	try {
-		const cities = await City.find({});
-		const updatePromises = cities.map(city => updateCityWeatherForLocal(city.cityName, city.country));
-		await Promise.all(updatePromises);
-		console.log("All cities updated successfully");
-		res.json({ result: true, message: 'All cities updated successfully' });
-	} catch (error) {
-		console.error("Error updating cities:", error);
-		res.json({ result: false, error: error.message });
-	}
-});
-
-
-
-// Add city to user's list
+// Add city to user's list in the database
 router.post('/addCity', async (req, res) => {
 	try {
 		// Authenticate user by token
