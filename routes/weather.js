@@ -58,12 +58,12 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
 // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, country, user) => {
+const updateCityWeatherForUser = async (cityName, cities, country) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
-	if (apiData.cod === 200 && apiData.weather && apiData.main && apiData.sys && apiData.coord) {
-		const city = user.cities.find(city => city.cityName === cityName && city.country === country);
+	if (apiData.cod === 200) {
+		const city = cities.find(city => city.cityName === cityName && city.country === country);
 
 		if (city) {
 			city.main = apiData.weather[0].main;
@@ -84,41 +84,30 @@ const updateCityWeatherForUser = async (cityName, country, user) => {
 			city.latitude = apiData.coord.lat;
 			city.longitude = apiData.coord.lon;
 			city.timezone = apiData.timezone;
-
-			user.markModified('cities');
 		}
-	}
-	else {
-		console.error(`Error fetching weather data for ${cityName}:`, apiData.message);
 	}
 };
 
 // Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
-    try {
-        const user = await User.findOne({ token: req.query.token });
+	try {
+		const user = await User.findOne({ token: req.query.token }).populate('cities');
 
-        if (!user) {
-            console.log('User not found for token:', req.query.token);
-            return res.json({ result: false, error: 'User not found' });
-        }
+		if (!user) {
+			console.log('User not found for token:', req.query.token);
+			return res.json({ result: false, error: 'User not found' });
+		}
 
-        if (user.cities && user.cities.length > 0) {
-            const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user));
-            await Promise.all(updatePromises);
+		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
+		await Promise.all(updatePromises);
 
-            // Save the user after all updates
-            await user.save();
+		await user.save();
 
-            // Return the updated cities
-            res.json({ result: true, message: 'All cities updated successfully', cities: user.cities });
-        } else {
-            res.json({ result: false, error: 'No cities to update' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ result: false, error: 'Internal Server Error' });
-    }
+		res.json({ result: true, message: 'All cities updated successfully' });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
 });
 
 
@@ -126,7 +115,7 @@ router.get('/updateUserCities', async (req, res) => {
 // Get user's cities
 router.get('/userCities', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.query.token });
+		const user = await User.findOne({ token: req.query.token }).populate('cities');
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
