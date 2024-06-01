@@ -98,7 +98,7 @@ router.get('/updateUserCities', async (req, res) => {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
-		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
+		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, city.country, user.cities));
 		await Promise.all(updatePromises);
 
 		await user.save();
