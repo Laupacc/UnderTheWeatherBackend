@@ -58,12 +58,12 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
 // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, cities) => {
+const updateCityWeatherForUser = async (cityName, user) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
-	if (apiData.cod === 200) {
-		const city = cities.find(city => city.cityName === cityName);
+	if (apiData.cod === 200 && apiData.weather && apiData.main && apiData.sys && apiData.coord) {
+		const city = user.cities.find(city => city.cityName === cityName);
 
 		if (city) {
 			city.main = apiData.weather[0].main;
@@ -86,6 +86,9 @@ const updateCityWeatherForUser = async (cityName, cities) => {
 			city.timezone = apiData.timezone;
 		}
 	}
+	else {
+		console.error(`Error fetching weather data for ${cityName}:`, apiData.message);
+	}
 };
 
 // Update weather data for cities in user's list
@@ -98,7 +101,7 @@ router.get('/updateUserCities', async (req, res) => {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
-		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
+		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user));
 		await Promise.all(updatePromises);
 
 		await user.save();
