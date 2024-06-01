@@ -63,35 +63,41 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 	const apiData = await response.json();
 
 	if (apiData.cod === 200) {
-		const city = cities.find(city => city.cityName === cityName && city.country === country);
-
-		if (city) {
-			city.main = apiData.weather[0].main;
-			city.country = apiData.sys.country;
-			city.description = apiData.weather[0].description;
-			city.icon = apiData.weather[0].icon;
-			city.temp = apiData.main.temp;
-			city.feels_like = apiData.main.feels_like;
-			city.tempMin = apiData.main.temp_min;
-			city.tempMax = apiData.main.temp_max;
-			city.humidity = apiData.main.humidity;
-			city.wind = apiData.wind.speed;
-			city.clouds = apiData.clouds.all;
-			city.rain = apiData.rain ? apiData.rain['1h'] : 0;
-			city.snow = apiData.snow ? apiData.snow['1h'] : 0;
-			city.sunrise = apiData.sys.sunrise;
-			city.sunset = apiData.sys.sunset;
-			city.latitude = apiData.coord.lat;
-			city.longitude = apiData.coord.lon;
-			city.timezone = apiData.timezone;
-		}
+		// Find the city in the user's list
+		await User.cities.findOneAndUpdate(
+			{ cityName: cityName },
+			{
+				main: apiData.weather[0].main,
+				country: apiData.sys.country,
+				description: apiData.weather[0].description,
+				icon: apiData.weather[0].icon,
+				temp: apiData.main.temp,
+				feels_like: apiData.main.feels_like,
+				tempMin: apiData.main.temp_min,
+				tempMax: apiData.main.temp_max,
+				humidity: apiData.main.humidity,
+				wind: apiData.wind.speed,
+				clouds: apiData.clouds.all,
+				rain: apiData.rain ? apiData.rain['1h'] : 0,
+				snow: apiData.snow ? apiData.snow['1h'] : 0,
+				sunrise: apiData.sys.sunrise,
+				sunset: apiData.sys.sunset,
+				latitude: apiData.coord.lat,
+				longitude: apiData.coord.lon,
+				timezone: apiData.timezone,
+			},
+			{ new: true } // Return the updated document
+		);
 	}
 };
+
+
+
 
 // Update weather data for cities in user's list
 router.get('/updateUserCities', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.query.token }).populate('cities');
+		const user = await User.findOne({ token: req.query.token });
 
 		if (!user) {
 			console.log('User not found for token:', req.query.token);
@@ -115,7 +121,7 @@ router.get('/updateUserCities', async (req, res) => {
 // Get user's cities
 router.get('/userCities', async (req, res) => {
 	try {
-		const user = await User.findOne({ token: req.query.token }).populate('cities');
+		const user = await User.findOne({ token: req.query.token });
 		if (!user) {
 			return res.json({ result: false, error: 'User not found' });
 		}
