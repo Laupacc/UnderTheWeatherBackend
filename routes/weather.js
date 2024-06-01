@@ -58,12 +58,12 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
 // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, cities, country) => {
+const updateCityWeatherForUser = async (cityName, cities) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
 	if (apiData.cod === 200) {
-		const city = cities.find(city => city.cityName === cityName && city.country === country);
+		const city = cities.find(city => city.cityName === cityName);
 
 		if (city) {
 			city.main = apiData.weather[0].main;
