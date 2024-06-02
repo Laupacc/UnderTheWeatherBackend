@@ -9,7 +9,7 @@ const OWM_API_KEY = process.env.OWM_API_KEY;
 
 
 // Update weather data for a specific city in user's list
-const updateCityWeatherForUser = async (cityName, cities, country) => {
+const updateCityWeatherForUser = async (cityName, country) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
@@ -44,7 +44,11 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 			},
 			{ new: true } // Return the updated document
 		);
-		console.log('Update Result:', updateResult);
+		if (!updateResult) {
+			console.log(`No matching document found for cityName: ${cityName}, country: ${country}`);
+		} else {
+			console.log('Update Result:', updateResult); // Log update result for debugging
+		}
 	}
 };
 
@@ -58,14 +62,16 @@ router.get('/updateUserCities', async (req, res) => {
 			return res.json({ result: false, error: 'User not found' });
 		}
 
-		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
+		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, city.country));
 		await Promise.all(updatePromises);
 
-		console.log('All cities updated successfully 1'); // Log success
+		const updatedUser = await User.findOne({ token: req.query.token });
+
+		console.log('All cities updated successfully first'); // Log success
 
 		await user.save();
 
-		res.json({ result: true, message: 'All cities updated successfully' });
+		res.json({ result: true, message: 'All cities updated successfully', user: updatedUser });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
