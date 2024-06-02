@@ -13,6 +13,8 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 	const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OWM_API_KEY}&units=metric`);
 	const apiData = await response.json();
 
+	console.log('API Data:', apiData);
+	
 	if (apiData.cod === 200) {
 		// Find the city in the user's list
 		await User.findOneAndUpdate(
@@ -57,6 +59,8 @@ router.get('/updateUserCities', async (req, res) => {
 
 		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
 		await Promise.all(updatePromises);
+
+		console.log('All cities updated successfully'); // Log success
 
 		await user.save();
 
