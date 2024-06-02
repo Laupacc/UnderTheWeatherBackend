@@ -7,20 +7,6 @@ const User = require('../models/users');
 
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
-// Get user's cities
-router.get('/userCities', async (req, res) => {
-	try {
-		const user = await User.findOne({ token: req.query.token });
-		if (!user) {
-			return res.json({ result: false, error: 'User not found' });
-		}
-
-		res.json({ result: true, cities: user.cities });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ result: false, error: 'Internal Server Error' });
-	}
-});
 
 // Update weather data for a specific city in user's list
 const updateCityWeatherForUser = async (cityName, cities, country) => {
@@ -81,6 +67,20 @@ router.get('/updateUserCities', async (req, res) => {
 	}
 });
 
+// Get user's cities
+router.get('/userCities', async (req, res) => {
+	try {
+		const user = await User.findOne({ token: req.query.token });
+		if (!user) {
+			return res.json({ result: false, error: 'User not found' });
+		}
+
+		res.json({ result: true, cities: user.cities });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ result: false, error: 'Internal Server Error' });
+	}
+});
 
 // Get all cities for local storage
 router.get('/localStorageCities', async (req, res) => {
