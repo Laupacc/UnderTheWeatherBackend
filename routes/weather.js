@@ -17,7 +17,7 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 
 	if (apiData.cod === 200) {
 		// Find the city in the user's list
-		await User.findOneAndUpdate(
+		const updateResult = await User.findOneAndUpdate(
 			{ cities: { $elemMatch: { cityName: cityName, country: country } } },
 
 			{
