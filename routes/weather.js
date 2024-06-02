@@ -14,7 +14,7 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 	const apiData = await response.json();
 
 	console.log('API Data:', apiData);
-	
+
 	if (apiData.cod === 200) {
 		// Find the city in the user's list
 		await User.findOneAndUpdate(
@@ -44,6 +44,7 @@ const updateCityWeatherForUser = async (cityName, cities, country) => {
 			},
 			{ new: true } // Return the updated document
 		);
+		console.log('Update Result:', updateResult);
 	}
 };
 
@@ -60,7 +61,7 @@ router.get('/updateUserCities', async (req, res) => {
 		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, user.cities));
 		await Promise.all(updatePromises);
 
-		console.log('All cities updated successfully'); // Log success
+		console.log('All cities updated successfully 1'); // Log success
 
 		await user.save();
 
