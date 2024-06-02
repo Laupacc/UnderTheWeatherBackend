@@ -69,7 +69,7 @@ router.get('/updateUserCities', async (req, res) => {
 
 		await user.save();
 
-		res.json({ result: true, message: 'All cities updated successfully'});
+		res.json({ result: true, message: 'All cities updated successfully' });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
@@ -98,24 +98,46 @@ router.get('/localStorageCities', async (req, res) => {
 	const lat = req.query.lat;
 	const lon = req.query.lon;
 
-	if (cityName && country) {
-		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`)
-		const data = await response.json();
+	try {
+		let response, data;
+
+		if (cityName && country) {
+			response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName},${country}&appid=${OWM_API_KEY}&units=metric`);
+		} else if (lat && lon) {
+			response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric`);
+		} else {
+			return res.json({ result: false, error: 'Missing cityName or lat/lon in request query' });
+		}
+
+		data = await response.json();
+
 		if (data.cod === 200) {
-			res.json({ result: true, weather: data });
+			const weather = {
+				cityName: data.name,
+				country: data.sys.country,
+				main: data.weather[0].main,
+				description: data.weather[0].description,
+				icon: data.weather[0].icon,
+				temp: data.main.temp,
+				feels_like: data.main.feels_like,
+				tempMin: data.main.temp_min,
+				tempMax: data.main.temp_max,
+				humidity: data.main.humidity,
+				wind: data.wind.speed,
+				clouds: data.clouds.all,
+				sunrise: data.sys.sunrise,
+				sunset: data.sys.sunset,
+				latitude: data.coord.lat,
+				longitude: data.coord.lon,
+				timezone: data.timezone,
+			};
+
+			res.json({ result: true, weather });
 		} else {
 			res.json({ result: false, error: data.message });
 		}
-	} else if (lat && lon) {
-		const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OWM_API_KEY}&units=metric`)
-		const data = await response.json();
-		if (data.cod === 200) {
-			res.json({ result: true, weather: data });
-		} else {
-			res.json({ result: false, error: data.message });
-		}
-	} else {
-		res.json({ result: false, error: 'Missing cityName or lat/lon in request query' });
+	} catch (error) {
+		res.json({ result: false, error: 'An error occurred while fetching the weather data' });
 	}
 });
 
