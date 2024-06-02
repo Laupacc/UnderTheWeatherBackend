@@ -65,13 +65,11 @@ router.get('/updateUserCities', async (req, res) => {
 		const updatePromises = user.cities.map(city => updateCityWeatherForUser(city.cityName, city.country));
 		await Promise.all(updatePromises);
 
-		const updatedUser = await User.findOne({ token: req.query.token });
-
 		console.log('All cities updated successfully first'); // Log success
 
 		await user.save();
 
-		res.json({ result: true, message: 'All cities updated successfully', user: updatedUser });
+		res.json({ result: true, message: 'All cities updated successfully'});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ result: false, error: 'Internal Server Error' });
