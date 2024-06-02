@@ -109,14 +109,6 @@ router.get('/localStorageCities', async (req, res) => {
 		data = await response.json();
 		if (data.cod === 200) {
 
-			// Check if the city already exists in the local storage
-			let existingCities = JSON.parse(localStorage.getItem('cities')) || [];
-			let existingCity = existingCities.find(city => city.cityName === data.name && city.country === data.sys.country);
-
-			if (existingCity) {
-				return res.json({ result: false, error: 'City already exists in the local storage' });
-			}
-
 			const weather = {
 				cityName: data.name,
 				country: data.sys.country,
