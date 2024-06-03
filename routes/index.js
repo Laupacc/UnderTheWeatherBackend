@@ -43,8 +43,7 @@ router.get('/cityautocomplete', async (req, res) => {
 router.delete('/deleteCity', async (req, res) => {
     try {
         // Authenticate user by token
-        const user = await User.findOne
-            ({ token: req.body.token }).populate('cities');
+        const user = await User.findOne({ token: req.body.token });
         if (!user) {
             return res.json({ result: false, error: 'User not found' });
         }
@@ -52,7 +51,7 @@ router.delete('/deleteCity', async (req, res) => {
         // Find city by name in user's cities
         const cityIndex = user.cities.findIndex(city => city.cityName.toLowerCase() === req.body.cityName.toLowerCase());
         if (cityIndex === -1) {
-            return res.json({ result: false, error: 'City not found in user\'s list' });
+            return res.json({ result: false, error: `City not found in user's list` });
         }
 
         // Get city object
