@@ -90,10 +90,10 @@ router.get('/userCities', async (req, res) => {
 
 // Get all cities for local storage
 router.get('/localStorageCities', async (req, res) => {
-	const cityName = req.body.cityName;
-	const country = req.body.country;
-	const lat = req.body.lat;
-	const lon = req.body.lon;
+	const cityName = req.query.cityName;
+	const country = req.query.country;
+	const lat = req.query.lat;
+	const lon = req.query.lon;
 
 	try {
 		let response, data;
